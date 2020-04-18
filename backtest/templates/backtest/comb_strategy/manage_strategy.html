@@ -1,0 +1,339 @@
+{% extends 'backtest/comb_strategy/comb_strategy_base.html' %}
+
+{% block content %}
+{% if nostrategy %}
+{{nostrategy}}
+{% else %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{parent_path}}{{comb_strategy}}</h4>
+        <div class="strategystate"
+            style="margin-top:12px;margin-right:5px; width:15px; height:15px; border-radius: 20px; background-color: {{comb_strategy.state}}">
+        </div>
+    </div>
+    {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+    {% else %}
+    <div class="displayoposite">
+        <div>
+            <a href="{% url 'backtest:comb_modify_general' id_comb_strategy=comb_strategy.id %}"
+                class="btn btn-primary margin-right-5">Modify General</a>
+            <a href="{% url 'backtest:comb_add_strategy' id_comb_strategy=comb_strategy.id %}"
+                class="btn btn-primary">Add Strategy</a>
+        </div>
+        <div>
+            <a href="javascript:add_click()" class="btn btn-primary">Launch Simulation</a>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" style="width: 33.3%;"
+                    onclick="openCity(event, 'General')">General</button>
+                <button class="tablinks" style="width: 33.3%;" onclick="openCity(event, 'Strategy')">Strategies</button>
+                <button class="tablinks" style="width: 33.3%;" onclick="openCity(event, 'Results')">Results</button>
+            </div>
+            <div id="General" class="tabcontent active">
+                <table class="table">
+                    <thead>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Starting Capital</td>
+                            <td>{{ comb_strategy.capital }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Max Number of Positions</td>
+                            <td>{{ comb_strategy.positions }}</td>
+                        </tr>
+                        <tr>
+                            <td>Price Commissions</td>
+                            <td>{{ comb_strategy.commissions }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark</td>
+                            {% if comb_strategy.benchmark %}
+                            {% if comb_strategy.benchmark.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_default_universe' id=comb_strategy.benchmark.child_id %}">{{ comb_strategy.benchmark }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_universe' id=comb_strategy.benchmark.child_id %}">{{ comb_strategy.benchmark }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ comb_strategy.benchmark }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Universe</td>
+                            {% if comb_strategy.universe %}
+                            {% if comb_strategy.universe.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:manage_default_universe' id=comb_strategy.universe.child_id %}">{{ comb_strategy.universe }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:manage_universe' id=comb_strategy.universe.child_id %}">{{ comb_strategy.universe }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ comb_strategy.universe }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Transaction Type</td>
+                            <td>{{ comb_strategy.transaction_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>Frequency</td>
+                            <td>{{ comb_strategy.frequency }}</td>
+                        </tr>
+                        <tr>
+                            <td>StartDate</td>
+                            <td>{{ comb_strategy.startdate }}</td>
+                        </tr>
+                        <tr>
+                            <td>EndDate</td>
+                            <td>{{ comb_strategy.enddate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="Strategy" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Strategy</th>
+                        {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+                        {% else %}
+                        <th>Active</th>
+                        <th>Delete</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for strategy in comb_strategy.get_strategy %}
+                        <tr>
+                            <td {% if not user.is_superuser and parent_path == 'Default Folder/' %}{% else %}style="width: 5%;"
+                                class="text-center" {% endif %}><input type="text" style="width: 20px;"
+                                    value="{{strategy.order}}" data-id="{{strategy.id}}" class="order" /></td>
+                            <td {% if not user.is_superuser and parent_path == 'Default Folder/' %}{% else %}style="width: 5%;"
+                                class="text-center" {% endif %}>
+                                <div class="strategystate"
+                                    style="margin-top: 3px; margin-left: 15px; width:15px; height:15px; border-radius: 20px; background-color: {{strategy.strategy.state}}">
+                                </div>
+                            </td>
+                            {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+                            <td><a href="#">{{strategy}}</a></td>
+                            {% else %}
+                            <td><a href="{% url 'backtest:display' id=strategy.strategy_id %}">{{strategy}}</a></td>
+                            <td><input type="checkbox" value="{{strategy.id}}"
+                                    style="margin-left: 15px;margin-top: 5px;"
+                                    {% if strategy.active %}checked{% endif %} /></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-strategy="{{strategy.id}}" data-comb="{{comb_strategy.id}}"><i
+                                        class="fa fa-trash" aria-hidden="true"></i>Remove</a></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td>No Strategies</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Results" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        {% if comb_strategy.results %}
+                        <tr>
+                            <td>Total Return</td>
+                            <td {% if comb_strategy.results.Total_return < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Total_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark Return</td>
+                            <td {% if comb_strategy.results.Benchmark_return < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Benchmark_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Annualized Return</td>
+                            <td {% if comb_strategy.results.Annualized_return < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Annualized_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Max Drowdown</td>
+                            <td {% if comb_strategy.results.Max_drawdown < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Max_drawdown }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark Max Drowdown</td>
+                            <td {% if comb_strategy.results.Benchmark_max_drawdown < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Benchmark_max_drawdown }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Winner Percentage</td>
+                            <td {% if comb_strategy.results.pctwinners < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.pctwinners }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Sharpe Ratio</td>
+                            <td {% if comb_strategy.results.Sharpe_ratio < 0 %}style="color:red" {% endif %}>
+                                {{ comb_strategy.results.Sharpe_ratio }}%</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td>No Results!</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="status" style="margin-top: 10px;">
+    <div class="progress">
+        <div class="bar progress-bar progress-bar-striped"></div>
+    </div>
+</div>
+
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'backtest:comb_remove_strategy' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to remove strategy from strategy combination?</h5>
+                    <input type="hidden" name="id_comb" id="id_comb" />
+                    <input type="hidden" name="id_strategy" id="id_strategy" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Remove</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var token = '{{csrf_token}}';
+    $(document).ready(function () {
+        $(document).on("click", ".confirm-delete", function () {
+            $("#id_comb").val($(this).data("comb"))
+            $("#id_strategy").val($(this).data("strategy"))
+        })
+    })
+    document.getElementById("General").style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    function add_click() {
+        var strategy_order = [];
+        var strategy_id = [];
+        $(".order").each(function () {
+            strategy_id.push($(this).data("id"));
+            strategy_order.push($(this).val());
+        })
+        var strategy_selected = document.querySelectorAll('#Strategy input[type="checkbox"]:checked');
+        var strategy_unselected = document.querySelectorAll('#Strategy input[type="checkbox"]:not(:checked)');
+        var strategy_checked_value = []
+        var strategy_unchecked_value = []
+        if (strategy_selected.length < 2) {
+            toastr.error('There should be at least two active strategy');
+        }
+        else {
+            for (var i = 0; i < strategy_selected.length; i++) {
+                strategy_checked_value[i] = strategy_selected[i].value;
+            }
+            for (var i = 0; i < strategy_unselected.length; i++) {
+                strategy_unchecked_value[i] = strategy_unselected[i].value;
+            }
+            var strategy_status = {
+                "strategy_selected": strategy_checked_value,
+                "strategy_unselected": strategy_unchecked_value,
+                "strategy_order": strategy_order,
+                "strategy_id": strategy_id,
+            }
+            $.ajax({
+                headers: { "X-CSRFToken": token },
+                type: "POST",
+                url: "{% url 'backtest:strategy_status' id_comb=comb_strategy.id %}",
+                data: {
+                    "strategy_status": JSON.stringify(strategy_status)
+                },
+                success: function (data) {
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'backtest:comb_launch_strategy' comb_strategy.id %}",
+                        dataType: "html",
+                        async: false,
+                        success: function (task_id) {
+                            if (task_id == 'error') {
+                                toastr.error("There shold be at least 2 active strategies")
+                            }
+                            else if (task_id == 'error1') {
+                                toastr.error("Each strategy should have at least one buyrule and sellrule")
+                            }
+                            else {
+                                var poll_xhr;
+                                var willstop = 0;
+                                (function () {
+                                    var poll = function () {
+                                        poll_xhr = $.ajax({
+                                            url: "{% url 'backtest:comb_launch_state' %}",
+                                            type: "POST",
+                                            data: {
+                                                task_id: task_id,
+                                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                            },
+                                            success: function (result) {
+                                                if (result.process_percent == null || result.process_percent == undefined) {
+                                                    willstop = 1;
+                                                    jQuery('.bar').css({ 'width': 100 + '%' });
+                                                    jQuery('.bar').html(100 + '%');
+                                                    location.href = "{% url 'backtest:comb_launch_result' comb_strategy.id %}"
+                                                }
+                                                else {
+                                                    jQuery('.bar').css({ 'width': result.process_percent + '%' });
+                                                    jQuery('.bar').html(result.process_percent + '%');
+                                                }
+                                            }
+                                        });
+                                    }
+                                    var refreshIntervalId = setInterval(function () {
+                                        poll();
+                                        if (willstop == 1) {
+                                            clearInterval(refreshIntervalId)
+                                        }
+                                    }, 500);
+                                })();
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    }
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+{% load bootstrap4 %}
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Interactive Alpha{% endblock %}</title>
+        {% bootstrap_css %} {# Embed Bootstrap CSS #}
+        {% block extra_css %}
+        {% endblock %}
+        <link rel='stylesheet' type='text/css' href="{% static "css/ionicons.min.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/owl.carousel.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/magnific-popup.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/style.css" %}" >
+        <link rel="stylesheet" type="text/css" href="{% static 'backtest/backtest_style.css' %}" />
+        <link rel='stylesheet' type='text/css' href="{% static "css/strategy_tabs.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/strategy_btns.css" %}" >
+        <link href="{% static 'bootstrap_tags/css/drag_drop.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src='{% static "js/jquery.min.js" %}' ></script>
+    </head>
+    <body>
+        <div id='main-wrapper' >
+                <section id='features' class='section features-section'>
+                    <div class='container' >
+                        {% block content %}{% endblock %}
+                    </div>
+                </section>
+                <footer class="backtest-footer">
+                    <div class='container text-center' >
+                        <p>&copy; Interactive Alpha</p>
+                    </div>
+                </footer>
+            </div>
+    </body>
+    <script>
+        $(window).on('load', function(){
+            $('body').addClass('loaded');
+
+        });
+    </script>
+    {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
+    {% block extra_js %}
+    {% endblock %}
+    <script src="https://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
+{#    <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>#}
+    <script src='{% static "js/jquery.fitvids.js" %}' ></script>
+    <script src='{% static "js/owl.carousel.min.js" %}' ></script>
+    <script src='{% static "js/jquery.magnific-popup.min.js" %}' ></script>
+    <script src='{% static "js/validator.min.js" %}' ></script>
+    <script src='{% static "js/script.js" %}' ></script>
+    <script src='{% static "bootstrap_tags/js/jquery.caret.min.js" %}'></script>
+    <script src="{% static "bootstrap_tags/js/drag_drop.js" %}"></script>
+</html>

@@ -1,0 +1,98 @@
+{% extends "chart/chart_base.html" %}
+
+{% block content %}
+    <style>
+        {% if chart.id or list.id or instrument_list %}
+            #list.active:after {
+                background: #57b87b;
+                width: 61%;
+            }
+        {% endif %}
+        {% if list.id or instrument_list %}
+            #universe.active:after {
+                background: #57b87b;
+                width: 61%;
+            }
+        {% endif %}
+    </style>
+    <section class="design-process-section" id="process-tab">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-1"></div>
+          <div class="col-md-10">
+            <!-- design process steps-->
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs process-model more-icon-preocess" role="tablist">
+              <li role="presentation" id="list" {% if chart.id or list.id or instrument_list %}class="active"{% endif %}><i class="fa fa-search" aria-hidden="true"></i>
+                <p>List</p></li>
+              <li role="presentation" id="universe" {% if list.id or instrument_list %}class="active"{% endif %}><i class="fa fa-send-o" aria-hidden="true"></i>
+                <p>Universe</p></li>
+              <li role="presentation" id="instrument" {% if instrument_list %}class="active"{% endif %}><i class="fa fa-qrcode" aria-hidden="true"></i>
+                <p>Instrument</p></li>                  
+            </ul>
+            <!-- end design process steps-->
+            <!-- Tab panes -->
+            <div class="tab-content">
+            {% if chart.id %}                  
+              <div role="tabpanel" class="tab-pane active" id="strategy">
+                <div class="design-process-content">
+                  <h3 class="semi-bold">List</h3>
+                    <form method="POST" action="{% url 'chart:add_list' chart_id=chart.id %}">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                  </div>
+              </div>
+            {% endif %}
+            {% if list.id %}
+              <div role="tabpanel" class="tab-pane active" id="optimization">
+                <div class="design-process-content row">
+                  <h3 class="semi-bold">Universe</h3>                        
+                  {% for file in load_file_list %}                
+                  <div class="col-md-12"> 
+                    <a style="width: 100%" class="btn btn-default" href="{% url 'chart:add_universe' chart_id=chart_id list_id=list.id f_name=file %}">{{ file }}</a> 
+                  </div>             
+                  {% empty %}
+                  <p>No File!</p>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+            {% if instrument_list %}
+              <div role="tabpanel" class="tab-pane active" id="content">
+                <div class="design-process-content">
+                  <h3 class="semi-bold">Instrument</h3>                   
+                  <form method="POST" action="{% url 'chart:add_instrument'  chart_id=chart_id list_id=list_id f_name=f_name %}">
+                    {% csrf_token %}
+                    <select class="mySelect for" multiple="multiple" style="width: 100%;" name="instrument[]" required>
+                    </select>
+                    <div class="text-right" style="padding-top: 12px">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                  </form>                 
+              </div>
+              </div>
+            {% endif %}
+          </div>
+          </div>
+          <div class="col-md-1"></div>
+        </div>
+      </div>
+    </section>
+<script>
+var data = "{{instrument_list|safe}}"; 
+if (data){
+  data = data.replace(/'/g, '"');
+  data = JSON.parse(data)
+  var placeholder = "select instruments";
+  $(".mySelect").select2({
+      data: data,
+      placeholder: placeholder,
+      allowClear: false,
+  });
+}
+</script>
+{% endblock %}

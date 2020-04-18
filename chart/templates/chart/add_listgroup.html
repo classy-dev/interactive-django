@@ -1,0 +1,14 @@
+{% extends "chart/chart_base.html" %}
+
+{% block content %}
+    <div class="col-md-4 col-md-offset-4 form-type">
+        <h2>New Chart</h2>
+        <form method="POST" action="{% url 'chart:add_lists' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

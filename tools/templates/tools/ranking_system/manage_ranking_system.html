@@ -1,0 +1,166 @@
+{% extends "tools/ranking_system/base_ranking_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{relative_path}}{{ranking_system}}</h4>
+    </div>
+    {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+    {% else %}
+    <div class="flex-wrap">
+        <a href="{% url 'tools:rank_add_indicator_combination' id=ranking_system.id %}" class="btn btn-primary">Add
+            Indicator Combination
+        </a>
+        <a href="{% url 'tools:rank_add_ranking_rule' id=ranking_system.id %}" class="btn btn-primary">Add Ranking Rule
+        </a>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" style="width: 50%;" onclick="openCity(event, 'Combinations')">Indicator
+                    Combinations</button>
+                <button class="tablinks" style="width: 50%;" onclick="openCity(event, 'Rules')">Rules</button>
+            </div>
+        </div>
+    </div>
+    <div id="Combinations" class="tabcontent active">
+        <table class="table">
+            <thead>
+                <th>Indicator Combinations:</th>
+                {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                {% else %}
+                <th>Delete:</th>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% for combination in indicator_combinations %}
+                <tr>
+                    {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                    <td>{{combination}}
+                    </td>
+                    {% else %}
+                    <td><a
+                            href="{% url 'tools:rank_modify_combination' id_comb=combination.id id_system=ranking_system.id %}">{{combination}}</a>
+                    </td>
+                    <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                            data-type="combination" data-rule="{{combination.id}}" data-rank="{{ranking_system.id}}">
+                            <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">No Indicator Combination</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="Rules" class="tabcontent">
+        <table class="table sortable">
+            <tr>
+                <th>Weight:</th>
+                <th>Indicators</th>
+                <th>Name:</th>
+                <th>Direction:</th>
+                {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                {% else %}
+                <th>Delete:</th>
+                {% endif %}
+            </tr>
+            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+            {% for ranking_rule in ranking_rules %}
+            <tr>
+                <td><a>{{ranking_rule.weight}}</a>
+                </td>
+                <td><a>{{ranking_rule.indicator}}</a>
+                </td>
+                <td><a>{{ranking_rule.name}}</a>
+                </td>
+                {% if ranking_rule.direction == "HB" %}
+                <td><a>Higher is better</a></td>
+                {% elif ranking_rule.direction == "LB" %}
+                <td><a>Lower is better</a></td>
+                {% endif %}
+                {% empty %}
+                <td>No Ranking Rules!</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            {% for ranking_rule in ranking_rules %}
+            <tr>
+                <td><a
+                        href="{% url 'tools:rank_modify_rule' id_rank=ranking_system.id id_rule=ranking_rule.id %}">{{ranking_rule.weight}}</a>
+                </td>
+                <td><a
+                        href="{% url 'tools:rank_modify_rule' id_rank=ranking_system.id id_rule=ranking_rule.id %}">{{ranking_rule.indicator}}</a>
+                </td>
+                <td><a
+                        href="{% url 'tools:rank_modify_rule' id_rank=ranking_system.id id_rule=ranking_rule.id %}">{{ranking_rule.name}}</a>
+                </td>
+                {% if ranking_rule.direction == "HB" %}
+                <td><a href="{% url 'tools:rank_modify_rule' id_rank=ranking_system.id id_rule=ranking_rule.id %}">Higher
+                        is
+                        better</a></td>
+                {% elif ranking_rule.direction == "LB" %}
+                <td><a href="{% url 'tools:rank_modify_rule' id_rank=ranking_system.id id_rule=ranking_rule.id %}">Lower
+                        is
+                        better</a></td>
+                {% endif %}
+                <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal" data-type="rule"
+                        data-rule="{{ranking_rule.id}}" data-rank="{{ranking_system.id}}">
+                        <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                {% empty %}
+                <td>No Ranking Rules!</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:rank_delete_rule' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="rank_id" id="rank_id" />
+                    <input type="hidden" name="id" id="deleteid" />
+                    <input type="hidden" name="type" id="type" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $(document).on("click", ".confirm-delete", function () {
+            $("#deleteid").val($(this).data('rule'))
+            $("#rank_id").val($(this).data('rank'))
+            $("#type").val($(this).data('type'))
+        });
+    })
+    document.getElementById('Combinations').style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+{% endblock %}

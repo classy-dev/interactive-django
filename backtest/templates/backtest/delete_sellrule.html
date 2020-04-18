@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{% url "backtest:delete_sellrule" id_sellrule=sellrule.id id_strategy=strategy.id %}" method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete this  sell rule "{{ sellrule.sellrules.title }}"?</p>
+    <input type="text" name="sellrules" value="{{ sellrule.sellrules.title }}" class="form-control" readonly>
+    <input type="submit" value="Confirm" />
+</form>
+{% endblock content %}

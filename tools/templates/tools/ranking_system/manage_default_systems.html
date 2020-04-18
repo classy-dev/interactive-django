@@ -1,0 +1,46 @@
+{% extends "tools/ranking_system/base_ranking_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{folder}}</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        <a href="{% url 'tools:rank_add_ranking_system' %}" class="btn btn-primary margin-right-5"> Add Ranking System
+        </a>
+        <a href="{% url 'tools:rank_load_ranking_system' %}" class="btn btn-primary margin-right-5"> Load Ranking System
+        </a>
+    </div>
+    <table class="table sortable" style="margin-top:10px">
+        <tr>
+            <th>Name</th>
+            <th>Export</th>
+            {% if user.is_superuser %}
+            <th>Delete</th>
+            {% endif %}
+        </tr>
+        {% for ranking_system in ranking_systems %}
+        <tr>
+            <td><a href="{% url 'tools:rank_manage_ranking_system' id=ranking_system.id %}">{{ranking_system}}</a></td>
+            <td><a href="{% url 'tools:rank_export_ranking_system' id_rank_system=ranking_system.id id_parent=999999999999 %}">Export</a></td>
+            {% if user.is_superuser %}
+            <td><a href="{% url 'tools:rank_delete_ranking_system' id=ranking_system.id %}"><i class="fa fa-trash"
+                        aria-hidden="true"></i> Delete </a></td>
+            {% endif %}
+            {% empty %}
+            <td>No Ranking System!</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<script>
+    error_message = "{{error_message}}"
+    $(document).ready(function () {
+        if (error_message) {
+            toastr.error('Not Empty Folder')
+        }
+    })
+</script>
+{% endblock %}

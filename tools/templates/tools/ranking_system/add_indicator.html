@@ -1,0 +1,14 @@
+{% extends "base_modal.html" %}
+
+{% block actionURl %}
+{% url 'tools:rank_add_indicator' source=source indicator=indicator id_rank=id_rank %}
+{% endblock %}
+{% block title %}
+{{ indicator }}
+{% endblock %}
+{% block description %}
+{{ indicator_property.description }}
+{% endblock %}
+{% block content %}
+{{ form.as_p }}
+{% endblock content %}

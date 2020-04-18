@@ -1,0 +1,102 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block sidebar %}
+<ul class="nav flex-column pl-1">
+        <div id="jstree-tree" class="well col-sm-3"></div>
+</ul>
+{% endblock %}
+
+{% block content %}
+<style>
+        #testid+.tag-editor .tag-editor-delete {
+                display: none;
+        }
+</style>
+<div class="table-container">
+        <div class="row">
+                <div class="col-md-6">
+                        <form action="{% url 'backtest:add_indicator_combination' id_strategy=id_strategy %}"
+                                method="POST">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <div class="form-group" style="margin-top: 30px;">
+                                        <input type="submit" value="Add this indicator" class="btn btn-primary" />
+                                        <a class="btn btn-primary"
+                                                href="{% url 'backtest:display' id=id_strategy %}">Back to my
+                                                strategy</a>
+                                </div>
+                        </form>
+                </div>
+                <div class="col-md-6">
+                        <p>Indicators Available:</p>
+                        <input class="form-control technical" id="testid"></input>
+                </div>
+        </div>
+</div>
+<div id="modal-div"></div>
+{% block jquery %}
+<script>
+        var flag = false;
+        var modalDiv = $("#modal-div");
+        $(document).ready(function () {
+                $.ajax({
+                        method: "GET",
+                        url: '{% url "backtest:get_rules" id_strategy %}',
+                        dataType: "html",
+                        async: false,
+                        success: function (data) {
+                                var rules = data.split('#');
+                                $('.technical').tagEditor({
+                                        initialTags: rules,
+                                        beforeTagDelete: function (field, editor, tags, val) {
+                                                $.ajax({
+                                                        headers: { "X-CSRFToken": token },
+                                                        method: "GET",
+                                                        url: '{% url "backtest:gettechnical" %}',
+                                                        data: {
+                                                                'techindicator': val,
+                                                                'id_strategy': strategyid,
+                                                                'from': 'add',
+                                                        },
+                                                        success: function (data) {
+                                                                modalDiv.html(data);
+                                                                $("#myEdit").modal('show');
+                                                        }
+                                                })
+                                                return flag;
+                                        },
+                                });
+                                $('#indicator_1').tagEditor({ initialTags: [] });
+                                $('#indicator_2').tagEditor({ initialTags: [] });
+                        }
+                });
+        });
+        var indicator_tree = "{{indicator_tree|safe}}";
+        if (indicator_tree) {
+                indicator_tree = indicator_tree.replace(/'/g, '"');
+                indicator_tree = JSON.parse(indicator_tree)
+                var action_url = "{% url 'backtest:add_indicator' source='comb' indicator='000000' id_rule=999999999 id_strategy=id_strategy %}";
+                $('#jstree-tree')
+                        .on('select_node.jstree', function (e, data) {
+                                var objNode = data.instance.get_node(data.selected)
+                                if (objNode.parent != "#") {
+                                        $.ajax({
+                                                url: action_url.replace('000000', objNode.text),
+                                                success: function (data) {
+                                                        modalDiv.html(data);
+                                                        $("#myEdit").modal('show');
+                                                }
+                                        });
+                                }
+                        })
+                        .jstree({
+                                core: {
+                                        data: indicator_tree
+                                }
+                        });
+        }
+</script>
+{% endblock %}
+{% endblock content %}

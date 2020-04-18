@@ -1,0 +1,57 @@
+{% extends "tools/universes/base_universes.html" %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'tools:manage_boolean_operation' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Select Universes</h2>
+                <label>Universe_1: </label>
+                <select class="form-control" name="universe_1" required>
+                    {% for parent_universe in parent_universes %}
+                    {% if parent_universe.type == 1 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">
+                        {{parent_universe.universe.title}}</option>
+                    {% elif parent_universe.type == 0 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">
+                        {{parent_universe.universe.parent_path}}{{parent_universe.universe}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                <label>Operation: </label>
+                <select class="form-control" name="operation" required>
+                    <option value="0">Add</option>
+                    <option value="1">Substract</option>
+                    <option value="2">Intersect</option>
+                </select>
+                <label>Universe_2: </label>
+                <select class="form-control" name="universe_2" required>
+                    {% for parent_universe in parent_universes %}
+                    {% if parent_universe.type == 1 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">
+                        {{parent_universe.universe.title}}</option>
+                    {% elif parent_universe.type == 0 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">
+                        {{parent_universe.universe.parent_path}}{{parent_universe.universe}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                <h2 class="strategy_title text-left">New Universe</h2>
+                <label>Name: </label>
+                <input type="text" name="universe_name" class="form-control" required>
+                <label>Parent Folder: </label>
+                <select class="form-control" name="parent_id">
+                    <option value="0">Top Folder</option>
+                    {% for folder in folders %}
+                    <option value="{{folder.id}}">{{folder}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" class="btn btn-primary pull-right" value="Create" style="margin-top: 10px;">
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+{% endblock %}

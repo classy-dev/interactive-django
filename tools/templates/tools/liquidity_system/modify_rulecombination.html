@@ -1,0 +1,58 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% block content %}
+<style>
+    #testid+.tag-editor .tag-editor-delete {
+        display: none;
+    }
+</style>
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="{% url 'tools:liquidity_modify_rulecombination' id_rule=id_rule id_system=id_system %}"
+                method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" class="btn btn-primary" value="Modify this rule" />
+                    <a class="btn btn-primary"
+                        href="{% url 'tools:liquidity_manage_liquidity_system' id=id_system %}">back to my
+                        system</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <label>Rules Available: </label>
+            <inptu id="testid" class="form-control combination" disabled="disabled"></inptu>
+        </div>
+    </div>
+</div>
+
+{% block jquery %}
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:liquidity_get_rule_combination_modify" id_system=id_system %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('.combination').tagEditor({ initialTags: rules });
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_rule" id_rulecombination=id_rule id_strategy=0 %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('#technical_1').tagEditor({ initialTags: [rules[0]] });
+                $('#technical_2').tagEditor({ initialTags: [rules[1]] });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock content %}

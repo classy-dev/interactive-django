@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class='row' >
+    <div class='col-md-8 offset-md-2' >
+        <div class='features-text' >
+            <h2 class="strategy_result text-left">Backtest Strategies</h2>
+            {% for strategy in strategies %}
+                <div class="row">
+                    <div class="col-md-10 strategy_list"> <a href="{% url 'backtest:display' id=strategy.id %}">{{ strategy.name }}</a></div>
+                    <div class="col-md-1 strategy_list"><a href="{% url 'backtest:delete_strategy' id_strategy=strategy.id %}">   Delete </a></div>
+                    <div class="col-md-1 strategy_list"><a href="{% url 'backtest:export_strategy' id_strategy=strategy.id %}">   Export </a></div>
+                    <div class="clearfix"></div>
+                </div>
+                <hr>
+{% empty %}
+    <p>No Strategy!</p>
+{% endfor %}
+        </div>
+    </div>
+</div>
+<div class='row features-row' >
+    <div class='col-md-4 col-sm-6 offset-md-3' >
+        <div class='feature' >
+            <div class='icon' >
+                <i class='ion-android-add' ></i>
+            </div>
+            <div class='content' >
+                <h4><a href="{% url 'backtest:add_strategy' %}">Add Strategy</a></h4>
+            </div>
+        </div>
+    </div>
+    <div class='col-md-4 col-sm-6' >
+        <div class='feature' >
+            <div class='icon' >
+                <i class='ion-ios-loop' ></i>
+            </div>
+            <div class='content' >
+                <h4><a href="{% url 'backtest:load_strategy_list' %}">Load Strategy</a></h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

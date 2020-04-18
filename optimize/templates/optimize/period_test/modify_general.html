@@ -1,0 +1,43 @@
+{% extends "optimize/period_test/period_base.html" %}
+
+{% load bootstrap4 %}
+
+{% block content %}
+
+<div class="table-container">
+    <div class="row" style="margin-bottom: 40px">
+        <div class="col-md-3 col-sm-3 col-3"></div>
+        <div class="col-md-4 col-sm-4 col-4">
+            <form action="#" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" id="submit" class="btn btn-primary pull-right" value="Modify" disabled >
+            </form>
+        </div>
+        <div class="col-md-4 col-sm-4 col-4"></div>
+    </div>
+</div>
+<script>
+    function date_validate(){
+        var start_date = $("#id_startdate").val();
+        var end_date = $("#id_enddate").val()
+        if (new Date(start_date) < new Date("1999-01-01") || new Date(end_date) < new Date("1999-01-01")) {
+            toastr.error("Date can't be ealier than January 1, 1999");
+            $("#submit").prop('disabled', true);
+        }
+        else if (new Date(start_date) > new Date() || new Date(end_date) > new Date()) {
+            toastr.error("Date can't be late than Today");
+            $("#submit").prop('disabled', true);
+        }
+        else {
+            $("#submit").prop('disabled', false);
+        }
+    }
+    $("#id_startdate").on('dp.change', function (e) {
+        date_validate()
+    });
+    $("#id_enddate").on('dp.change', function (e) {
+        date_validate()
+    });
+</script>
+{% endblock content %}

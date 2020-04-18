@@ -1,0 +1,71 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    {% if top_folder %}
+    <div class="displayoposite">
+        <h4 class="strategy_title">top folder</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        <a href="{% url 'tools:liquidity_add_liquidity_system' %}" class="btn btn-primary margin-right-5"> Add Liquidity System
+        </a>
+        <a href="{% url 'tools:liquidity_load_liquidity_system' %}" class="btn btn-primary margin-right-5"> Load Liquidity System
+        </a>
+    </div>
+    <table class="table sortable" style="margin-top:10px">
+        <tr>
+            <th>Name</th>
+            <th>Export</th>
+            <th>Delete</th>
+        </tr>
+        {% for liquidity_system in liquidity_systems %}
+        <tr>
+            <td><a href="{% url 'tools:liquidity_manage_liquidity_system' id=liquidity_system.id %}">{{liquidity_system}}</a></td>
+            <td><a href="{% url 'tools:liquidity_export_liquidity_system' id_system=liquidity_system.id id_parent=0 %}">Export</a></td>
+            <td><a href="{% url 'tools:liquidity_delete_liquidity_system' id_system=liquidity_system.id %}"><i class="fa fa-trash"
+                        aria-hidden="true"></i> Delete </a></td>
+            {% empty %}
+            <td>No Liquidity System!</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{folder}}</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        <a href="{% url 'tools:liquidity_add_liquidity_system' %}" class="btn btn-primary margin-right-5"> Add Liquidity System
+        </a>
+        <a href="{% url 'tools:liquidity_load_liquidity_system' %}" class="btn btn-primary margin-right-5"> Load Liquidity System
+        </a>        
+    </div>
+    <table class="table sortable" style="margin-top:10px">
+        <tr>
+            <th>Name</th>
+            <th>Export</th>
+            <th>Delete</th>
+        </tr>
+        {% for liquidity_system in liquidity_systems %}
+        <tr>
+            <td><a href="{% url 'tools:liquidity_manage_liquidity_system' id=liquidity_system.id %}">{{liquidity_system}}</a></td>
+            <td><a href="{% url 'tools:liquidity_export_liquidity_system' id_system=liquidity_system.id id_parent=parent_id %}">Export</a></td>
+            <td><a href="{% url 'tools:liquidity_delete_liquidity_system' id_system=liquidity_system.id %}"><i class="fa fa-trash"
+                        aria-hidden="true"></i> Delete </a></td>
+            {% empty %}
+            <td>No Liquidity System!</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+<script>
+    error_message = "{{error_message}}"
+    $(document).ready(function () {
+        if (error_message) {
+            toastr.error('Not Empty Folder')
+        }
+    })
+</script>
+{% endblock %}

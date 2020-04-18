@@ -1,0 +1,163 @@
+{% extends "tools/lists/base_universes.html" %}
+
+{% block content %}
+{% if not error_message %}
+<style>
+    .fixed-table-body {
+        height: auto !important;
+    }
+</style>
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{title}}</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        {# <a href="{% url 'backtest:rename_category' %}" class="btn btn-primary margin-right-5"> Rename Folder </a> #}
+        {#<a href="{% url 'tools:lists_add_instrument' id=universe.id %}" class="btn btn-primary margin-right-5 ">Add Instrument</a>#}
+    </div>
+    <table id="basic_table" class="table table-striped table-bordered" style="width:100%;margin-top:10px">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                {# <th>Add to List</th> #}
+                {# <th>Update</th> #}
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instrument in instruments %}
+            <tr>
+                <td>{{instrument.0}}</td>
+                <td>{{instrument.1}}</td>
+                {#<td><a href="#" class="add-modal" data-toggle="modal" data-target="#myModal_add" data-symbol="{{instrument.0}}" data-name="{{instrument.1}}">Add</a></td>#}
+                {#<td><a href="#" class="update-modal {% if not user.is_superuser and not universe.parent_id %}disabled{% endif %}" data-toggle="modal" data-target="#myModal_update" data-id="{{universe.id}}" data-symbol="{{instrument.0}}" data-name="{{instrument.1}}">update</a></td>#}
+                <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                        data-id="{{universe.id}}" data-symbol="{{instrument.0}}"><i class="fa fa-trash"
+                            aria-hidden="true"></i> Delete </a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="displayoposite" style="margin-top:30px;">
+        <h4 class="strategy_title">Select Parent Universe to add Instruments</h4>
+    </div>
+    <div style="display: flex;">
+        <select class="form-control margin-right-5" name="parent_universe" id="parent_universe" style="width:15%"
+            required>
+            <option value="0">------------</option>
+            {% for parent_universe in parent_universes %}
+                {% if parent_universe.type == 1 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">{{parent_universe.universe.title}}</option>
+                {% elif parent_universe.type == 0 %}
+                    <option value="{{ parent_universe.universe.id }}" data-type="{{parent_universe.type}}">{{parent_universe.universe.parent_path}}{{parent_universe.universe}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <a href="javascript:myFunction()" class="btn btn-primary margin-right-5">Add Checked Instruments</a>
+    </div>
+    <table id="parent_table" data-toggle="table" data-search="true" data-click-to-select="true" data-pagination="true"
+        data-pagination-pre-text="Previous" data-pagination-next-text="Next">
+        <thead>
+            <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="symbol" data-sortable="true">Symbol</th>
+                <th data-field="name" data-sortable="true">Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:lists_delete_instrument' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="symbol" id="delete_symbol" />
+                    <input type="hidden" name="id" id="universe_id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+
+    var parent_table = $("#parent_table")
+    $(document).ready(function () {
+        $('#basic_table').DataTable();
+        $(document).on("click", ".confirm-delete", function () {
+            $("#delete_symbol").val($(this).data('symbol'));
+            $("#universe_id").val($(this).data('id'));
+        });
+    });
+
+    $("#parent_universe").on('change', function () {
+        var type = $("#parent_universe option:selected").data("type");
+        $.ajax({
+            method: "GET",
+            url: "{% url 'tools:get_instrument_of_universe' %}",
+            data: {
+                "id": this.value,
+                "type": type,
+            },
+            success: function (data) {
+                parent_table.bootstrapTable('removeAll')
+                var ajax_instrument_data = [];
+                $.each(data, function (key, value) {
+                    ajax_instrument_data.push({
+                        symbol: value[0],
+                        name: value[1],
+                    })
+                });
+                parent_table.bootstrapTable('append', ajax_instrument_data)
+            }
+        })
+    });
+
+    token = "{{csrf_token}}";
+    selectedInstrument = [];
+
+    function myFunction() {
+        data = parent_table.bootstrapTable('getAllSelections');
+        universe_id = "{{universe.id}}";
+        if (data.length == 0) {
+            toastr.error('Please select instruments')
+        }
+        else {
+            for (var i = 0; i < data.length; i++) {
+                selectedInstrument.push([data[i].symbol, data[i].name])
+            }
+            $.ajax({
+                headers: { "X-CSRFToken": token },
+                type: 'POST',
+                url: '{% url "tools:lists_add_instrument_to_universe" %}',
+                data: {
+                    "universe_id": universe_id,
+                    "selectedInstrument": JSON.stringify(selectedInstrument)
+                },
+                success: function (data) {
+                    if (data == "success") {
+                        selectedInstrument = [];
+                        location.reload();
+                        $("#parent_universe").val(0);
+                        toastr.success('Successfully Added');
+                    }
+                }
+            });
+        }
+
+    }
+
+
+</script>
+{% else %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+amqp==2.4.2
+celery==4.3.0
+Django==2.2.1
+django-bootstrap-datepicker-plus==3.0.5
+django-bootstrap4==0.0.8
+django-filter==2.1.0
+django-polymorphic==2.0.3
+django-widget-tweaks==1.4.3
+eventlet==0.24.1
+numpy==1.16.3
+pandas==0.24.2
+pytz==2019.1
+requests==2.22.0
+six==1.12.0
+sqlparse==0.3.0

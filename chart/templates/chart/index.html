@@ -1,0 +1,961 @@
+{% extends "chart/chart_base.html" %}
+
+{% block content %}
+{% if chart_group %}
+    <div class="row">
+        <div class="col-md-12 text-right" style="margin-bottom: 20px; padding-right: 30px;">
+            <a href="{% url 'chart:add_chart' %}" class="btn btn-primary">Add Chart</a>
+            <a href="{% url 'chart:remove_chart_list' %}" class="btn btn-primary">Remove Chart</a>
+        </div>
+    </div>
+    <div class="row" id="chart_body">
+    {% for chart in chart_group %}
+        <div class="col-md-6" id="chart_node_{{ chart.chart_number }}">
+            <div class="row">
+                <h3 style="font-family: 'Blackadder ITC'; font-size: 40px; border-bottom: 1px solid gray;">Chart Title: {{ chart.chart_name }}</h3>
+                <div class="col-md-10">
+                    <div class="toolbar">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default color-picker" data-color="fill" data-toggle="tooltip"
+                                    title="Сhoose drawing fill color"><span
+                                    class="color-fill-icon dropdown-color-fill-icon"></span>&nbsp;<b
+                                    class="caret"></b>
+                            </button>
+
+                            <button type="button" class="btn btn-default color-picker" data-color="stroke" data-toggle="tooltip"
+                                    title="Сhoose drawing stroke color"><span
+                                    class="color-fill-icon dropdown-color-fill-icon"></span>&nbsp;<b
+                                    class="caret"></b>
+                            </button>
+
+                            <select class="selectpicker" id="select-stroke-settings"
+                                    title="Stroke settings"
+                                    data-style="btn-lg" data-width="121" multiple>
+                                <optgroup label="Stroke width" data-max-options="1">
+                                    <option data-settings="width" value="0">0 px</option>
+                                    <option data-settings="width" value="1" selected>1 px</option>
+                                    <option data-settings="width" value="2">2 px</option>
+                                    <option data-settings="width" value="3">3 px</option>
+                                    <option data-settings="width" value="4">4 px</option>
+                                    <option data-settings="width" value="5">5 px</option>
+                                </optgroup>
+                                <optgroup label="Stroke dash" data-max-options="1">
+                                    <option value="6" data-settings="type" selected>solid</option>
+                                    <option value="7" data-settings="type">dotted</option>
+                                    <option value="8" data-settings="type">dashed</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" data-action-type="unSelectedAnnotation" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Cursor">
+                                <i class="ac ac-mouse-pointer" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div class="select-container">
+                            <select class="selectpicker choose-drawing-tools-{{ chart.chart_id }}"
+                                    title="Drawing tools"
+                                    data-style="btn-lg" data-width="133" data-max-options="1">
+                                <optgroup label="Lines, Trend lines and Rays:">
+                                    <option data-icon="ac-line" data-annotation-type_{{ chart.chart_id }}="line">Line Segment</option>
+                                    <option data-icon="ac-horizontal-line" data-annotation-type_{{ chart.chart_id }}="horizontal-line">Horizontal
+                                        Line
+                                    </option>
+                                    <option data-icon="ac-vertical-line" data-annotation-type_{{ chart.chart_id }}="vertical-line">Vertical Line
+                                    </option>
+                                </optgroup>
+                                <optgroup label="Geometric shapes:">
+                                    <option data-icon="ac-triangle" data-annotation-type_{{ chart.chart_id }}="triangle">Triangle</option>
+                                    <option data-icon="ac-rectangle" data-annotation-type_{{ chart.chart_id }}="rectangle">Rectangle</option>
+                                    <option data-icon="ac-ellipse" data-annotation-type_{{ chart.chart_id }}="ellipse">Ellipse</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="btn-group hidden-xs">
+                            <button data-annotation-type_{{ chart.chart_id }}="line" type="button" class="btn btn-default" aria-label="Center Align"
+                                    data-toggle="tooltip" title="Line Segment">
+                                <i class="ac ac-line" aria-hidden="true"></i>
+                            </button>
+                            <button data-annotation-type_{{ chart.chart_id }}="horizontal-line" type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Horizontal Line">
+                                <i class="ac ac-horizontal-line" aria-hidden="true"></i>
+                            </button>
+                            <button data-annotation-type_{{ chart.chart_id }}="vertical-line" type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Vertical Line">
+                                <i class="ac ac-vertical-line" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div class="btn-group hidden-xs">
+                            <button data-annotation-type_{{ chart.chart_id }}="triangle" type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Triangle">
+                                <i class="ac ac-triangle" aria-hidden="true"></i>
+                            </button>
+                            <button data-annotation-type_{{ chart.chart_id }}="rectangle" type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Rectangle">
+                                <i class="ac ac-rectangle" aria-hidden="true"></i>
+                            </button>
+                            <button data-annotation-type_{{ chart.chart_id }}="ellipse" type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Ellipse">
+                                <i class="ac ac-ellipse" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div class="btn-group-container">
+                            <div class="btn-group">
+
+                                <select class="selectpicker select choose-marker-{{ chart.chart_id }}" id="select-marker-type"
+                                        title="Marker"
+                                        data-style="btn-lg" data-width="90" data-max-options="1">
+                                    <option data-icon="ac-arrow-up-square" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="arrowUp"
+                                            data-marker-anchor="center-top">Up Arrow
+                                    </option>
+                                    <option data-icon="ac-arrow-down-square" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="arrow-down" data-marker-anchor="center-bottom">Down Arrow
+                                    </option>
+                                    <option data-icon="ac-arrow-left-square" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="arrow-left" data-marker-anchor="left-center">Left Arrow
+                                    </option>
+                                    <option data-icon="ac-arrow-right-square" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="arrow-right" data-marker-anchor="right-center">Right Arrow
+                                    </option>
+                                    <option data-icon="ac-head-arrow" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="arrowHead"
+                                            data-marker-anchor="right-center">Head Arrow
+                                    </option>
+                                    <option data-icon="ac-cross" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="cross"
+                                            data-marker-anchor="center">Cross
+                                    </option>
+                                    <option data-icon="ac-diagonal-cros" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="diagonal-cross"
+                                            data-marker-anchor="center">Diagonal cross
+                                    </option>
+                                    <option data-icon="ac-diamond" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="diamond"
+                                            data-marker-anchor="center">Diamond
+                                    </option>
+                                    <option data-icon="ac-pentagon" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="pentagon"
+                                            data-marker-anchor="center">Pentagon
+                                    </option>
+                                    <option data-icon="ac-square" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="square"
+                                            data-marker-anchor="center">Square
+                                    </option>
+                                    <option data-icon="ac-star-1" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="star10"
+                                            data-marker-anchor="center">Star 1
+                                    </option>
+                                    <option data-icon="ac-star-2" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="star4"
+                                            data-marker-anchor="center">Star 2
+                                    </option>
+                                    <option data-icon="ac-star-3" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="star5"
+                                            data-marker-anchor="center">Star 3
+                                    </option>
+                                    <option data-icon="ac-star-4" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="star6"
+                                            data-marker-anchor="center">Star 4
+                                    </option>
+                                    <option data-icon="ac-star-5" data-annotation-type_{{ chart.chart_id }}="marker" data-marker-type="star7"
+                                            data-marker-anchor="center">Star 5
+                                    </option>
+                                    <option data-icon="ac-trapezium" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="trapezium"
+                                            data-marker-anchor="center">Trapezium
+                                    </option>
+                                    <option data-icon="ac-triangle-up" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="triangle-up"
+                                            data-marker-anchor="center-top">Triangle Up
+                                    </option>
+                                    <option data-icon="ac-triangle-down" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="triangle-down"
+                                            data-marker-anchor="center-bottom">Triangle Down
+                                    </option>
+                                    <option data-icon="ac-triangle-left" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="triangle-left"
+                                            data-marker-anchor="left-center">Triangle Left
+                                    </option>
+                                    <option data-icon="ac-triangle-right" data-annotation-type_{{ chart.chart_id }}="marker"
+                                            data-marker-type="triangle-right"
+                                            data-marker-anchor="right-center">Triangle Right
+                                    </option>
+                                </select>
+
+                                <button type="button" class="btn btn-default volume-btn" data-el-size="marker" data-volume="20"
+                                        data-toggle="popover">Marker size
+                                </button>
+
+                            </div>
+                        </div>
+                        <div class="btn-group-container">
+                            <div class="btn-group">
+                                <button data-annotation-type_{{ chart.chart_id }}="label" type="button" class="btn btn-default"
+                                        aria-label="Center Align"
+                                        data-toggle="tooltip" title="Label">
+                                    <i class="ac ac-font"></i>
+                                </button>
+
+                                <button type="button" class="btn btn-default" id="annotation-label-autosize_{{ chart.chart_id }}"
+                                        aria-label="Auto-resize" data-toggle="tooltip" title="Auto-resize">
+                                    <i class="ac ac-enlarge" aria-hidden="true"></i>
+                                </button>
+
+                                <button type="button" class="btn btn-default color-picker" data-color="fontColor"
+                                        data-toggle="tooltip"
+                                        title="Сhoose font color"><span
+                                        class="color-fill-icon dropdown-color-fill-icon" data-color="black"></span>&nbsp;<b
+                                        class="caret"></b>
+                                </button>
+
+                                <button type="button" class="btn btn-default volume-btn" data-el-size="label" data-volume="15"
+                                        data-toggle="popover">Font size
+                                </button>
+
+                                <select class="selectpicker" id="select-font-style"
+                                        title="Font settings"
+                                        data-style="btn-lg" data-width="121" multiple>
+                                    <optgroup label="Font style" data-max-options="2">
+                                        <option data-icon="ac-italic" data-label-method="fontStyle" value="italic">Italic
+                                        </option>
+                                        <option data-icon="ac-bold" data-label-method="fontWeight" value="bold">Bold</option>
+                                    </optgroup>
+                                    <optgroup label="Font decoration" data-max-options="1" data-label-method="fontDecoration">
+                                        <option data-icon="ac-strikethrough" value="line-through">Line-through</option>
+                                        <option data-icon="ac-overline" value="overline">Overline</option>
+                                        <option data-icon="ac-underline" value="underline">Underline</option>
+                                    </optgroup>
+                                    <optgroup label="Horizontal align" data-max-options="1" data-label-method="hAlign">
+                                        <option data-icon="ac-align-center" value="center">Center</option>
+                                        <option data-icon="ac-align-left" value="left">Left</option>
+                                        <option data-icon="ac-align-right" value="right">Right</option>
+                                        <option data-icon="ac-position-left" value="start">Start</option>
+                                        <option data-icon="ac-position-right" value="end">End</option>
+                                    </optgroup>
+                                    <optgroup label="Anchor" data-max-options="1" data-label-method="anchor">
+                                        <option data-icon="ac-anc-cb" value="center-bottom">Center bottom</option>
+                                        <option data-icon="ac-anc-ct" value="center-top">Center top</option>
+                                        <option data-icon="ac-anc-lb" value="left-bottom">Left bottom</option>
+                                        <option data-icon="ac-anc-lc" value="left-center">Left center</option>
+                                        <option data-icon="ac-anc-lt" value="left-top">Left top</option>
+                                        <option data-icon="ac-anc-rb" value="right-bottom">Right bottom</option>
+                                        <option data-icon="ac-anc-rc" value="right-center">Right center</option>
+                                        <option data-icon="ac-anc-rt" value="right-top">Right top</option>
+                                        <option data-icon="ac-anc-c" value="center">Center</option>
+                                    </optgroup>
+                                    <optgroup label="Vertical align" data-max-options="1" data-label-method="vAlign">
+                                        <option data-icon="ac-position-top" value="top">Top</option>
+                                        <option data-icon="ac-position-center2" value="middle">Middle</option>
+                                        <option data-icon="ac-position-bottom" value="bottom">Bottom</option>
+                                    </optgroup>
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="btn-group-container">
+                            <div class="btn-group">
+                                <button data-action-type="removeSelectedAnnotation-{{ chart.chart_id }}" type="button" class="btn btn-default"
+                                        aria-label="Center Align" data-toggle="tooltip" title="Delete selected drawing">
+                                    <i class="ac ac-remove-thin" aria-hidden="true"></i>
+                                </button>
+                                <button data-action-type="removeAllAnnotations-{{ chart.chart_id }}" type="button" class="btn btn-default"
+                                        aria-label="Center Align" data-toggle="tooltip" title="Delete all drawings">Remove All
+                                </button>
+                                <button data-action-type="saveAnnotations-{{ chart.chart_id }}" type="button" class="btn btn-default"
+                                        aria-label="Center Align" data-toggle="tooltip" title="Save drawings">Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chart-container_{{ chart.chart_id }}" style="height: 600px;"></div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label>Period</label>
+                                    <select name="period" id="period_{{ chart.chart_id }}" style="width: 100%">
+                                        <option>-----</option>
+                                        <option value="d" {% if chart.chart_period == 'd' %} selected {% endif %}>Daily</option>
+                                        <option value="w" {% if chart.chart_period == 'w' %} selected {% endif %}>Weekly</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Chart Type</label>
+                                    <select id="chart_type_{{ chart.chart_id }}" name="c_type" style="width: 100%">
+                                        <option>---------</option>
+                                        {% for ct in chart.chart_types %}
+                                            <option value="{{ ct.id }}" {% if chart.chart_type == ct.type %}selected{% endif %}>{{ ct.type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>decreasing_color</label>
+                                    <select name="d_color" id="d_color_{{ chart.chart_id }}" style="width: 100%">
+                                        <option>-------</option>
+                                        {% for c_color_v, c_color_n in chart.chart_colors %}
+                                            <option value="{{ c_color_v }}" {% if chart.d_color == c_color_v %}selected{% endif %} style="color: {{ c_color_v }}">{{ c_color_n }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>increasing_color</label>
+                                    <select name="i_color" id="i_color_{{ chart.chart_id }}" style="width: 100%">
+                                        <option>-------</option>
+                                        {% for c_color_v, c_color_n in chart.chart_colors %}
+                                            <option value="{{ c_color_v }}" {% if chart.i_color == c_color_v %}selected{% endif %} style="color: {{ c_color_v }}">{{ c_color_n }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-1" style="margin-top: 17px">
+                                    <a href="javascript:chart_setting('{{ csrf_token }}',{{ chart.chart_id }})" class="btn btn-primary btn-sm">update</a>
+                                </div>
+                            </div><hr style="margin: 0;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h6>Overlay</h6>
+                                        <select name="overlay_add" id="overlay_add_{{ chart.chart_id }}" style="width: 100%;padding-top: 5px">
+                                            <option>----------------</option>
+                                            {% for overlay in chart.overlays %}
+                                                <option value="{{ overlay.id }}">{{ overlay.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h6>Parameter</h6>
+                                        <input type="text" value="" id="param_id_add_{{ chart.chart_id }}" style="width: 100%">
+                                    </div>
+                                    <div class="col-md-2" style="padding-top: 30px;">
+                                        <a href="javascript:overlay_update('{{ csrf_token }}',{{ chart.chart_id }})" class="btn btn-primary btn-sm">Add Overlay</a>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            {% for overlay in chart.chart_overlays %}
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h6>Overlay</h6>
+                                        <select name="overlay_{{ overlay.id }}" id="overlay_{{ overlay.id }}" style="width: 100%;padding-top: 5px">
+                                            <option>----------------</option>
+                                            {% for overlay_option in chart.overlays %}
+                                                <option value="{{ overlay_option.id}}" {% if overlay == overlay_option %}selected="selected"{% endif %}>{{ overlay_option.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h6>Parameter</h6>
+                                        {% for overlay_option in chart.overlays %}
+                                            {% if overlay == overlay_option %}
+                                                <input type="text" value="{{ overlay_option.param }}" id="param_id_{{ overlay.id }}" style="width: 100%">
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-md-4" style="padding-top: 30px;">
+                                        {% for overlay_option in chart.overlays %}
+                                            {% if overlay == overlay_option %}
+                                                <a href="javascript:overlay_update('{{ csrf_token }}',{{ chart.chart_id }},{{ overlay.id }})" class="btn btn-primary btn-sm">update</a>
+                                                <a href="javascript:delete_overlay({{ chart.chart_id }},{{ overlay.id }})" class="btn btn-primary btn-sm">delete</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <hr style="margin: 0;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h6>Indicator</h6>
+                                    <select name="indicator_add" id="indicator_add_{{ chart.chart_id }}" style="width: 100%;padding-top: 5px">
+                                        <option>----------------</option>
+                                        {% for indicator in chart.indicators %}
+                                            <option value="{{ indicator.id }}">{{ indicator.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Parameter</h6>
+                                    <input type="text" value="" id="i_param_id_add_{{ chart.chart_id }}" style="width: 100%">
+                                </div>
+{#                                <div class="col-md-2">#}
+{#                                    <h6>Position</h6>#}
+{#                                    <select name="position" id="i_pos_add_{{ chart.chart_id }}">#}
+{#                                        <option>--------</option>#}
+{#                                        <option value="1">Above</option>#}
+{#                                        <option value="2">Behind Price</option>#}
+{#                                        <option value="3">Below</option>#}
+{#                                    </select>#}
+{#                                </div>#}
+                                <div class="col-md-2" style="padding-top: 30px;">
+                                    <a href="javascript:indicator_update('{{ csrf_token }}',{{ chart.chart_id }})" class="btn btn-primary btn-sm">Add Indicator</a>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            {% for indicator in chart.chart_indicators %}
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h6>Indicators</h6>
+                                        <select name="indicator" id="indicator_{{ indicator.id}}" style="width: 100%;;padding-top: 5px">
+                                            <option>----------------</option>
+                                            {% for indicator_option in chart.indicators %}
+                                                <option value="{{ indicator_option.id }}" {% if indicator == indicator_option %}selected{% endif %}>{{indicator_option.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h6>Parameter</h6>
+                                        {% for indicator_option in chart.indicators %}
+                                            {% if indicator == indicator_option %}
+                                                <input type="text" id="i_param_id_{{ indicator.id }}" value="{% if indicator == indicator_option %}{{ indicator_option.param }}{% endif %}" style="width: 100%">
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+{#                                    <div class="col-md-2">#}
+{#                                        <h6>Position</h6>#}
+{#                                        <select name="position" id="i_pos_{{ indicator.id }}" style="width: 100%">#}
+{#                                            <option>--------</option>#}
+{#                                            {% for indicator_option in chart.indicators %}#}
+{#                                                {% if indicator == indicator_option %}#}
+{#                                                    {% for pos_val, pos_name in chart.chart_position %}#}
+{#                                                        <option value="{{ pos_val }}" {% if indicator_option.position == pos_val %}selected{% endif %}>{{ pos_name }}</option>#}
+{#                                                    {% endfor %}#}
+{#                                                {% endif %}#}
+{#                                            {% endfor %}#}
+{#                                        </select>#}
+{#                                    </div>#}
+                                    <div class="col-md-4" style="padding-top: 30px;">
+                                        <a href="javascript:indicator_update('{{ csrf_token }}',{{ chart.chart_id }},{{ indicator.id }})" class="btn btn-primary btn-sm">update</a>
+                                        <a href="javascript:delete_indicator({{ chart.chart_id }},{{ indicator.id }})" class="btn btn-primary btn-sm">delete</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row text-center list-group-box">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-12">                                   
+                                        <div class="dropdown" id="list_group_id">
+                                            <button type="button" class="btn btn-primary dropdown-toggle list-btn" data-toggle="dropdown">
+                                                Lists
+                                            </button>
+                                            <ul class="dropdown-menu list-body">                                               
+                                                {% for lists in chart.ins_list %}                                                    
+                                                    {% for list in lists %}
+                                                        <li><a class="dropdown-item" href="javascript:get_instrument({{ chart.chart_id }},{{ list.id }})">{{ list.name }}</a></li>                                                   
+                                                    {% endfor %}
+                                                {% endfor %}                                               
+                                            </ul>
+                                        </div>
+                                        <div class="row" style="margin-top: 20px; margin-bottom: 20px;">
+                                            <div class="col-md-12">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-primary dropdown-toggle list-btn" data-toggle="dropdown">
+                                                        Options
+                                                    </button>
+                                                    <div class="dropdown-menu list-body">
+                                                        <li><a href="{% url 'chart:add_list' chart_id=chart.chart_id %}" class="dropdown-item">Add List</a></li>
+                                                        <li><a href="{% url 'chart:get_modify_list' chart_id=chart.chart_id %}" class="dropdown-item">Modify List</a></li>
+                                                        <li><a href="{% url 'chart:get_delete_list' chart_id=chart.chart_id %}" class="dropdown-item">Delete List</a></li>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>                                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row list-manager" style="margin-top: 40px;">
+                        <div class="col-md-12">
+                            <ul class="list-group" id="instrument_list_{{ chart.chart_id }}">
+                                {% for instrument in chart.instrument_arr %}
+                                    <li class='list-group-item'>
+                                        <a href='javascript:view_instrument({{ chart.chart_id }},{{ instrument.id }},{{ instrument.list_id }})'>{{ instrument.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+<div class="row">
+    <div class="col-md-12 text-right" style="margin-bottom: 20px; padding-right: 30px;">
+        <a href="{% url 'chart:add_chart' %}" class="btn btn-primary">Add Chart</a>
+    </div>
+</div>
+<div class="row" id="chart_body">
+    <div class="col-md-12">
+        <div class="row">
+            <h3 style="font-family: 'Blackadder ITC'; font-size: 40px; border-bottom: 1px solid gray;">Chart Title: No Chart</h3>
+            <div class="col-md-10">
+                <div class="toolbar">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default color-picker" data-color="fill" data-toggle="tooltip"
+                                title="Сhoose drawing fill color"><span
+                                class="color-fill-icon dropdown-color-fill-icon"></span>&nbsp;<b
+                                class="caret"></b>
+                        </button>
+
+                        <button type="button" class="btn btn-default color-picker" data-color="stroke" data-toggle="tooltip"
+                                title="Сhoose drawing stroke color"><span
+                                class="color-fill-icon dropdown-color-fill-icon"></span>&nbsp;<b
+                                class="caret"></b>
+                        </button>
+
+                        <select class="selectpicker"
+                                title="Stroke settings"
+                                data-style="btn-lg" data-width="121" multiple>
+                            <optgroup label="Stroke width" data-max-options="1">
+                                <option data-settings="width" value="0">0 px</option>
+                                <option data-settings="width" value="1" selected>1 px</option>
+                                <option data-settings="width" value="2">2 px</option>
+                                <option data-settings="width" value="3">3 px</option>
+                                <option data-settings="width" value="4">4 px</option>
+                                <option data-settings="width" value="5">5 px</option>
+                            </optgroup>
+                            <optgroup label="Stroke dash" data-max-options="1">
+                                <option value="6" data-settings="type" selected>solid</option>
+                                <option value="7" data-settings="type">dotted</option>
+                                <option value="8" data-settings="type">dashed</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" data-action-type="unSelectedAnnotation" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Cursor">
+                            <i class="ac ac-mouse-pointer" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="select-container">
+                        <select class="selectpicker"
+                                title="Drawing tools"
+                                data-style="btn-lg" data-width="133" data-max-options="1">
+                            <optgroup label="Lines, Trend lines and Rays:">
+                                <option data-icon="ac-line">Line Segment</option>
+                                <option data-icon="ac-horizontal-line">Horizontal
+                                    Line
+                                </option>
+                                <option data-icon="ac-vertical-line">Vertical Line
+                                </option>
+                            </optgroup>
+                            <optgroup label="Geometric shapes:">
+                                <option data-icon="ac-triangle">Triangle</option>
+                                <option data-icon="ac-rectangle">Rectangle</option>
+                                <option data-icon="ac-ellipse">Ellipse</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="btn-group hidden-xs">
+                        <button type="button" class="btn btn-default" aria-label="Center Align"
+                                data-toggle="tooltip" title="Line Segment">
+                            <i class="ac ac-line" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Horizontal Line">
+                            <i class="ac ac-horizontal-line" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Vertical Line">
+                            <i class="ac ac-vertical-line" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="btn-group hidden-xs">
+                        <button type="button" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Triangle">
+                            <i class="ac ac-triangle" aria-hidden="true"></i>
+                        </button>
+                        <button  type="button" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Rectangle">
+                            <i class="ac ac-rectangle" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-default"
+                                aria-label="Center Align" data-toggle="tooltip" title="Ellipse">
+                            <i class="ac ac-ellipse" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="btn-group-container">
+                        <div class="btn-group">
+
+                            <select class="selectpicker select" id="select-marker-type"
+                                    title="Marker"
+                                    data-style="btn-lg" data-width="90" data-max-options="1">
+                                <option data-icon="ac-arrow-up-square" 
+                                        data-marker-type="arrowUp"
+                                        data-marker-anchor="center-top">Up Arrow
+                                </option>
+                                <option data-icon="ac-arrow-down-square" 
+                                        data-marker-type="arrow-down" data-marker-anchor="center-bottom">Down Arrow
+                                </option>
+                                <option data-icon="ac-arrow-left-square" 
+                                        data-marker-type="arrow-left" data-marker-anchor="left-center">Left Arrow
+                                </option>
+                                <option data-icon="ac-arrow-right-square" 
+                                        data-marker-type="arrow-right" data-marker-anchor="right-center">Right Arrow
+                                </option>
+                                <option data-icon="ac-head-arrow"
+                                        data-marker-type="arrowHead"
+                                        data-marker-anchor="right-center">Head Arrow
+                                </option>
+                                <option data-icon="ac-cross" data-marker-type="cross"
+                                        data-marker-anchor="center">Cross
+                                </option>
+                                <option data-icon="ac-diagonal-cros"
+                                        data-marker-type="diagonal-cross"
+                                        data-marker-anchor="center">Diagonal cross
+                                </option>
+                                <option data-icon="ac-diamond" data-marker-type="diamond"
+                                        data-marker-anchor="center">Diamond
+                                </option>
+                                <option data-icon="ac-pentagon" data-marker-type="pentagon"
+                                        data-marker-anchor="center">Pentagon
+                                </option>
+                                <option data-icon="ac-square" data-marker-type="square"
+                                        data-marker-anchor="center">Square
+                                </option>
+                                <option data-icon="ac-star-1" data-marker-type="star10"
+                                        data-marker-anchor="center">Star 1
+                                </option>
+                                <option data-icon="ac-star-2" data-marker-type="star4"
+                                        data-marker-anchor="center">Star 2
+                                </option>
+                                <option data-icon="ac-star-3" data-marker-type="star5"
+                                        data-marker-anchor="center">Star 3
+                                </option>
+                                <option data-icon="ac-star-4" data-marker-type="star6"
+                                        data-marker-anchor="center">Star 4
+                                </option>
+                                <option data-icon="ac-star-5" data-marker-type="star7"
+                                        data-marker-anchor="center">Star 5
+                                </option>
+                                <option data-icon="ac-trapezium"
+                                        data-marker-type="trapezium"
+                                        data-marker-anchor="center">Trapezium
+                                </option>
+                                <option data-icon="ac-triangle-up"
+                                        data-marker-type="triangle-up"
+                                        data-marker-anchor="center-top">Triangle Up
+                                </option>
+                                <option data-icon="ac-triangle-down"
+                                        data-marker-type="triangle-down"
+                                        data-marker-anchor="center-bottom">Triangle Down
+                                </option>
+                                <option data-icon="ac-triangle-left"
+                                        data-marker-type="triangle-left"
+                                        data-marker-anchor="left-center">Triangle Left
+                                </option>
+                                <option data-icon="ac-triangle-right"
+                                        data-marker-type="triangle-right"
+                                        data-marker-anchor="right-center">Triangle Right
+                                </option>
+                            </select>
+
+                            <button type="button" class="btn btn-default volume-btn" data-el-size="marker" data-volume="20"
+                                    data-toggle="popover">Marker size
+                            </button>
+
+                        </div>
+                    </div>
+                    <div class="btn-group-container">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Center Align"
+                                    data-toggle="tooltip" title="Label">
+                                <i class="ac ac-font"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Auto-resize" data-toggle="tooltip" title="Auto-resize">
+                                <i class="ac ac-enlarge" aria-hidden="true"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-default color-picker" data-color="fontColor"
+                                    data-toggle="tooltip"
+                                    title="Сhoose font color"><span
+                                    class="color-fill-icon dropdown-color-fill-icon" data-color="black"></span>&nbsp;<b
+                                    class="caret"></b>
+                            </button>
+
+                            <button type="button" class="btn btn-default volume-btn" data-el-size="label" data-volume="15"
+                                    data-toggle="popover">Font size
+                            </button>
+
+                            <select class="selectpicker" id="select-font-style"
+                                    title="Font settings"
+                                    data-style="btn-lg" data-width="121" multiple>
+                                <optgroup label="Font style" data-max-options="2">
+                                    <option data-icon="ac-italic" data-label-method="fontStyle" value="italic">Italic
+                                    </option>
+                                    <option data-icon="ac-bold" data-label-method="fontWeight" value="bold">Bold</option>
+                                </optgroup>
+                                <optgroup label="Font decoration" data-max-options="1" data-label-method="fontDecoration">
+                                    <option data-icon="ac-strikethrough" value="line-through">Line-through</option>
+                                    <option data-icon="ac-overline" value="overline">Overline</option>
+                                    <option data-icon="ac-underline" value="underline">Underline</option>
+                                </optgroup>
+                                <optgroup label="Horizontal align" data-max-options="1" data-label-method="hAlign">
+                                    <option data-icon="ac-align-center" value="center">Center</option>
+                                    <option data-icon="ac-align-left" value="left">Left</option>
+                                    <option data-icon="ac-align-right" value="right">Right</option>
+                                    <option data-icon="ac-position-left" value="start">Start</option>
+                                    <option data-icon="ac-position-right" value="end">End</option>
+                                </optgroup>
+                                <optgroup label="Anchor" data-max-options="1" data-label-method="anchor">
+                                    <option data-icon="ac-anc-cb" value="center-bottom">Center bottom</option>
+                                    <option data-icon="ac-anc-ct" value="center-top">Center top</option>
+                                    <option data-icon="ac-anc-lb" value="left-bottom">Left bottom</option>
+                                    <option data-icon="ac-anc-lc" value="left-center">Left center</option>
+                                    <option data-icon="ac-anc-lt" value="left-top">Left top</option>
+                                    <option data-icon="ac-anc-rb" value="right-bottom">Right bottom</option>
+                                    <option data-icon="ac-anc-rc" value="right-center">Right center</option>
+                                    <option data-icon="ac-anc-rt" value="right-top">Right top</option>
+                                    <option data-icon="ac-anc-c" value="center">Center</option>
+                                </optgroup>
+                                <optgroup label="Vertical align" data-max-options="1" data-label-method="vAlign">
+                                    <option data-icon="ac-position-top" value="top">Top</option>
+                                    <option data-icon="ac-position-center2" value="middle">Middle</option>
+                                    <option data-icon="ac-position-bottom" value="bottom">Bottom</option>
+                                </optgroup>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="btn-group-container">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Delete selected drawing">
+                                <i class="ac ac-remove-thin" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Delete all drawings">Remove All
+                            </button>
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Center Align" data-toggle="tooltip" title="Save drawings">Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div style="height: 450px;"></div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label>Period</label>
+                                <select name="period">
+                                    <option>-----</option>
+                                    <option value="d" {% if chart.chart_period == 'd' %} selected {% endif %}>Daily</option>
+                                    <option value="w" {% if chart.chart_period == 'w' %} selected {% endif %}>Weekly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Chart Type</label>
+                                <select>
+                                    <option>---------</option>
+                                    {% for ct in chart.chart_types %}
+                                        <option {% if chart.chart_type == ct.type %}selected{% endif %}>{{ ct.type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                 <label>decreasing_color</label>
+                                <select name="d_color">
+                                    <option>-------</option>
+                                    {% for c_color_v, c_color_n in chart.chart_colors %}
+                                        <option value="{{ c_color_v }}" {% if chart.d_color == c_color_v %}selected{% endif %} style="color: {{ c_color_v }}">{{ c_color_n }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label>increasing_color</label>
+                                <select name="i_color" id="i_color_{{ chart.chart_id }}">
+                                    <option>-------</option>
+                                    {% for c_color_v, c_color_n in chart.chart_colors %}
+                                        <option value="{{ c_color_v }}" {% if chart.i_color == c_color_v %}selected{% endif %} style="color: {{ c_color_v }}">{{ c_color_n }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <a href="#" class="btn btn-primary btn-sm">update</a>
+                            </div>
+                        </div><hr style="margin: 0;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h6>Overlay</h6>
+                                    <select name="overlay_add" style="width: 100%;padding-top: 5px" >
+                                        <option>----------------</option>
+                                        {% for overlay in chart.overlays %}
+                                            <option value="{{ overlay.id }}">{{ overlay.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Parameter</h6>
+                                    <input type="text" value="" style="width: 100%">
+                                </div>
+                                <div class="col-md-2" style="padding-top: 30px;">
+                                    <a href="#" class="btn btn-primary btn-sm">Add Overlay</a>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>                        
+                        <hr style="margin: 0;">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h6>Indicator</h6>
+                                <select name="indicator_add" style="width: 100%;padding-top: 5px">
+                                    <option>----------------</option>
+                                    {% for indicator in chart.indicators %}
+                                        <option value="{{ indicator.id }}">{{ indicator.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <h6>Parameter</h6>
+                                <input type="text" value="" style="width: 100%">
+                            </div>
+{#                                <div class="col-md-2">#}
+{#                                    <h6>Position</h6>#}
+{#                                    <select name="position" id="i_pos_add_{{ chart.chart_id }}">#}
+{#                                        <option>--------</option>#}
+{#                                        <option value="1">Above</option>#}
+{#                                        <option value="2">Behind Price</option>#}
+{#                                        <option value="3">Below</option>#}
+{#                                    </select>#}
+{#                                </div>#}
+                            <div class="col-md-2" style="padding-top: 30px;">
+                                <a href="#" class="btn btn-primary btn-sm">Add Indicator</a>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        {% for indicator in chart.chart_indicators %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h6>Indicators</h6>
+                                    <select name="indicator" id="indicator_{{ indicator.id}}" style="width: 100%">
+                                        <option>----------------</option>
+                                        {% for indicator_option in chart.indicators %}
+                                            <option value="{{ indicator_option.id }}" {% if indicator == indicator_option %}selected{% endif %}>{{indicator_option.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Parameter</h6>
+                                    {% for indicator_option in chart.indicators %}
+                                        {% if indicator == indicator_option %}
+                                            <input type="text" id="i_param_id_{{ indicator.id }}" value="{% if indicator == indicator_option %}{{ indicator_option.param }}{% endif %}" style="width: 100%">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+{#                                    <div class="col-md-2">#}
+{#                                        <h6>Position</h6>#}
+{#                                        <select name="position" id="i_pos_{{ indicator.id }}">#}
+{#                                            <option>--------</option>#}
+{#                                            {% for indicator_option in chart.indicators %}#}
+{#                                                {% if indicator == indicator_option %}#}
+{#                                                    {% for pos_val, pos_name in chart.chart_position %}#}
+{#                                                        <option value="{{ pos_val }}" {% if indicator_option.position == pos_val %}selected{% endif %}>{{ pos_name }}</option>#}
+{#                                                    {% endfor %}#}
+{#                                                {% endif %}#}
+{#                                            {% endfor %}#}
+{#                                        </select>#}
+{#                                    </div>#}
+                                <div class="col-md-2" style="padding-top: 30px;">
+                                    <a href="#" class="btn btn-primary btn-sm">update</a>
+                                    <a href="#" class="btn btn-primary btn-sm">delete</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<script>
+    var i = 0;
+    var j = 0;
+    var k = 0;
+    var trace = [];
+    var chart_id = [];
+    var chart_type = [];
+    var chart_name = [];
+    var active_ins_name = [];
+    var overlay = [];
+    var indicator = [];
+    var rise_color = [];
+    var fall_color = [];
+    {% for chart in chart_group %}
+        trace[i]={{ chart.trace|safe }};
+        chart_id[i] = {{ chart.chart_id }};
+        chart_type[i] = '{{ chart.chart_type }}';
+        chart_name[i] = '{{ chart.chart_name }}';
+        active_ins_name[i] = '{{ chart.active_instrument_name }}';
+        rise_color[i] = '{{ chart.i_color }}';
+        fall_color[i] = '{{ chart.d_color }}';
+        overlay[i] = [];
+        j = 0;
+        {% for overlay in chart.chart_overlays %}
+            overlay[i][j] =[];
+            overlay[i][j].push('{{ overlay.type }}');
+            overlay[i][j].push('{{ overlay.name }}');
+            overlay[i][j].push('{{ overlay.param }}');
+            j++;
+        {% endfor %}
+        indicator[i] = [];
+        k = 0;
+            {#console.log({{ chart.chart_indicators }});#}
+        {% for indicator in chart.chart_indicators %}
+            if('{{ indicator.type }}' !== ''){
+                indicator[i][k] = [];
+                indicator[i][k].push('{{ indicator.type }}');
+                indicator[i][k].push('{{ indicator.name }}');
+                indicator[i][k].push('{{ indicator.param }}');
+                k++;
+            }
+        {% endfor %}
+        i++;
+    {% endfor %}
+
+    function get_instrument(chart_id, list_id) {
+    window.CSRF_TOKEN = "{{ csrf_token }}";
+    $.ajax({
+        url: "{% url 'chart:get_instrument' %}",
+        type: 'POST',
+        data: {csrfmiddlewaretoken: window.CSRF_TOKEN, list_id: list_id},
+        dataType: 'json',
+        success: function(instruments) {
+            var instrument_li = '';
+            for(var i = 0; i < instruments.length; i++) {
+                instrument_li += "<li class='list-group-item'><a href='javascript:view_instrument("+chart_id+","
+                    +instruments[i]['id']+","+list_id+")'>"+instruments[i]['name']+"</a></li>";
+            }
+            $('#instrument_list_'+chart_id).html(instrument_li);
+        }
+    });
+    }
+
+    function view_instrument(chart_id, ins_id, l_id) {
+        window.CSRF_TOKEN = "{{ csrf_token }}";
+        $.ajax({
+            url: "{% url 'chart:view_instrument' %}",
+            type: 'POST',
+            data: {csrfmiddlewaretoken: window.CSRF_TOKEN, chart_id: chart_id, instrument: ins_id, list_id: l_id},
+            dataType: 'html',
+            success: function(msg) {
+                if (msg === 'success')
+                   location.reload(true);
+            }
+        });
+    }
+    var body_len = $('#chart_body>div');
+    switch (body_len.length) {
+        case 1:
+            $('#chart_node_1').removeClass('col-md-6');
+            $('#chart_node_1').attr("class", "col-md-12");
+            break;
+        case 3:
+            $('#chart_node_3').removeClass('col-md-6');
+            $('#chart_node_3').attr("class", "col-md-12");
+            break;
+    }
+</script>
+{% endblock %}

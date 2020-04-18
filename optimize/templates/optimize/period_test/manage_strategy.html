@@ -1,0 +1,304 @@
+{% extends "optimize/period_test/period_base.html" %}
+
+{% block content %}
+{% if nostrategy %}
+{{nostrategy}}
+{% else %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{parent_path}}{{period_strategy}}</h4>
+        <div class="strategystate"
+            style="margin-top:12px;margin-right:5px; width:15px; height:15px; border-radius: 20px; background-color: {{period_strategy.state}}">
+        </div>
+    </div>
+    {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+    {% else %}
+    <div class="displayoposite">
+        <div>
+            <a href="{% url 'optimize:period_modify_general' id_strategy=period_strategy.id %}"
+                class="btn btn-primary margin-right-5">Modify General</a>
+            {% if period_strategy.strategy %}
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#changeStrategy">Change Strategy</a>
+            {% else %}
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addStrategy">Add Strategy</a>
+            {% endif %}
+        </div>
+        <div>
+            <a href="javascript:add_click()" class="btn btn-primary">Launch Simulation</a>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" style="width: 33.3%;"
+                    onclick="openCity(event, 'General')">General</button>
+                <button class="tablinks" style="width: 33.3%;" onclick="openCity(event, 'Strategy')">Strategy</button>
+                <button class="tablinks" style="width: 33.3%;" onclick="openCity(event, 'Results')">Results</button>
+            </div>
+            <div id="General" class="tabcontent active">
+                <table class="table">
+                    <thead>
+                        <th style="width: 55%;">Name</th>
+                        <th style="width: 45%;">Value</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Offset</td>
+                            <td>{{ period_strategy.offset }}</td>
+                        </tr>
+                        <tr>
+                            <td>Period</td>
+                            <td>{{ period_strategy.period }}</td>
+                        </tr>
+                        <tr>
+                            <td>StartDate</td>
+                            <td>{{ period_strategy.startdate }}</td>
+                        </tr>
+                        <tr>
+                            <td>EndDate</td>
+                            <td>{{ period_strategy.enddate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="Strategy" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Strategy</th>
+                        {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+                        {% else %}
+                        <th>Remove</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% if period_strategy.strategy %}
+                        <tr>
+                            {% if not user.is_superuser and parent_path == 'Default Folder/' %}
+                            <td><a
+                                    href="{% url 'backtest:display' id=period_strategy.strategy.id %}">{{ period_strategy.strategy }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:display' id=period_strategy.strategy.id %}">{{ period_strategy.strategy }}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-strategy="{{period_strategy.strategy.id}}"><i class="fa fa-trash"
+                                        aria-hidden="true"></i>Remove</a></td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <td>No Strategy!</td>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Results" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        {% if period_strategy.results %}
+                        <tr>
+                            <td>Total Return</td>
+                            <td {% if period_strategy.results.Total_return < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.Total_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark Return</td>
+                            <td {% if period_strategy.results.Benchmark_return < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.Benchmark_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Annualized Return</td>
+                            <td {% if period_strategy.results.Annualized_return < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.Annualized_return }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Max Drowdown</td>
+                            <td {% if period_strategy.results.Max_drawdown < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.Max_drawdown }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark Max Drowdown</td>
+                            <td {% if period_strategy.results.Benchmark_max_drawdown < 0 %}style="color:red"
+                                {% endif %}>
+                                {{ period_strategy.results.Benchmark_max_drawdown }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Winner Percentage</td>
+                            <td {% if period_strategy.results.pctwinners < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.pctwinners }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Sharpe Ratio</td>
+                            <td {% if period_strategy.results.Sharpe_ratio < 0 %}style="color:red" {% endif %}>
+                                {{ period_strategy.results.Sharpe_ratio }}%</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td>No Results!</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="status" style="margin-top: 10px;">
+    <div class="progress">
+        <div class="bar progress-bar progress-bar-striped"></div>
+    </div>
+</div>
+
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'optimize:period_remove_strategy' id_strategy=period_strategy.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to remove strategy?</h5>
+                    <input type="hidden" name="id_strategy" id="id_strategy" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Remove</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="addStrategy" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'optimize:period_add_strategy' id_strategy=period_strategy.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add Strategy</h2>
+                </div>
+                <div class="modal-body">
+                    {% for strategy in strategies %}
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="add_strategy" value="{{strategy.id}}">
+                            {{strategy}}
+                        </label>
+                    </div>
+                    {% empty %}
+                    <h5>No strategies. Please add strategies first. </h5>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="changeStrategy" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'optimize:period_change_strategy' id_strategy=period_strategy.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add Strategy</h2>
+                </div>
+                <div class="modal-body">
+                    {% for strategy in strategies %}
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="add_strategy" value="{{strategy.id}}">
+                            {{strategy}}
+                        </label>
+                    </div>
+                    {% empty %}
+                    <h5>No strategies. Please add strategies first. </h5>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Change</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $(document).on("click", ".confirm-delete", function () {
+            $("#id_strategy").val($(this).data("strategy"))
+        })
+    })
+    var token = '{{csrf_token}}';
+    document.getElementById("General").style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    function add_click() {
+        $.ajax({
+            method: "GET",
+            url: "{% url 'optimize:period_launch_strategy' period_strategy.id %}",
+            dataType: "html",
+            async: false,
+            success: function (task_id) {
+                if (task_id == 'error') {
+                    toastr.error("You should add strategy")
+                }
+                else if (task_id == 'error1') {
+                    toastr.error("Strategy should have at least one buyrule and sellrule")
+                }
+                else {
+                    var poll_xhr;
+                    var willstop = 0;
+                    (function () {
+                        var poll = function () {
+                            poll_xhr = $.ajax({
+                                url: "{% url 'optimize:period_launch_state' %}",
+                                type: "POST",
+                                data: {
+                                    task_id: task_id,
+                                    csrfmiddlewaretoken: "{{csrf_token}}",
+                                },
+                                success: function (result) {
+                                    if (result.process_percent == null || result.process_percent == undefined) {
+                                        willstop = 1;
+                                        jQuery('.bar').css({ 'width': 100 + '%' });
+                                        jQuery('.bar').html(100 + '%');
+                                        location.href = "{% url 'optimize:period_launch_result' period_strategy.id %}"
+                                    }
+                                    else {
+                                        jQuery('.bar').css({ 'width': result.process_percent + '%' });
+                                        jQuery('.bar').html(result.process_percent + '%');
+                                    }
+                                }
+                            });
+                        }
+                        var refreshIntervalId = setInterval(function () {
+                            poll();
+                            if (willstop == 1) {
+                                clearInterval(refreshIntervalId)
+                            }
+                        }, 500);
+                    })();
+                }
+            }
+        })
+    }
+</script>
+{% endif %}
+{% endblock %}

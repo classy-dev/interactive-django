@@ -1,0 +1,56 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% block content %}
+<style>
+    #testid+.tag-editor .tag-editor-delete {
+        display: none;
+    }
+</style>
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form
+                action="{% url "backtest:modify_rulecombination" id_rulecombination=rulecombination.id id_strategy=strategy.id %}"
+                method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="btn btn-primary" type="submit" value="Add this rule" />
+                <a class="btn btn-primary" href="{% url 'backtest:display' id=strategy.id %}">back to my strategy</a>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <label>Rule Combination Tags:</label>
+            <inptu id="testid" class="form-control combination" disabled="disabled"></inptu>
+        </div>
+    </div>
+</div>
+
+{% block jquery %}
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_rule_combination_modify" id_rulecombination=rulecombination.id id_strategy=strategy.id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split('#');
+                $('.combination').tagEditor({ initialTags: rules });
+
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_rule" id_rulecombination=id_rulecombination id_strategy=id_strategy %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split('#');
+                $('#technical_1').tagEditor({ initialTags: [rules[0]] });
+                $('#technical_2').tagEditor({ initialTags: [rules[1]] });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock content %}

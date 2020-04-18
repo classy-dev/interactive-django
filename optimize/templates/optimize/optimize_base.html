@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extracss %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/ionicons.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/magnific-popup.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/strategy_tabs.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/strategy_btns.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'backtest/backtest_style.css' %}" />
+<link href="{% static 'bootstrap_tags/css/drag_drop.css' %}" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/toastr.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.min.css' %}" />
+<script src='{% static "chart/js/jquery-ui.min.js" %}'></script>
+<script src='{% static "js/sorttable.js" %}'></script>
+<script src='{% static "js/toastr.min.js" %}'></script>
+<script src='{% static "js/jstree.min.js" %}'></script>
+{{ form.media.css }}
+{{ form.media.js }}
+{% endblock %}
+{% block subnav %}
+<nav class="navbar navbar-fixed-top navbar-toggleable-sm navbar-inverse bg-primary mb-3 customnavbacktest">
+    <ul class="navbar-nav">
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest displayinline menu_custom" href="{% url 'optimize:period_manage' %}">Period Bias Test</a>
+        </li>
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest displayinline menu_custom" href="#">Parameter Optimization</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(window).on("load", function () {
+        $("body").addClass("loaded");
+    });
+    
+</script>
+<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
+{# <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>#}
+<script src='{% static "js/jquery.fitvids.js" %}'></script>
+<script src='{% static "js/owl.carousel.min.js" %}'></script>
+<script src='{% static "js/jquery.magnific-popup.min.js" %}'></script>
+<script src='{% static "js/validator.min.js" %}'></script>
+<script src='{% static "js/script.js" %}'></script>
+<script src='{% static "bootstrap_tags/js/jquery.caret.min.js" %}'></script>
+<script src="{% static 'bootstrap_tags/js/drag_drop.js' %}"></script>
+<script src='{% static "js/jquery.canvasjs.min.js" %}'></script>
+{% endblock %}

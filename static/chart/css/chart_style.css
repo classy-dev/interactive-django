@@ -1,0 +1,103 @@
+#id_decreasing_color > option:nth-child(2) {
+  color: #00008b;
+}
+#id_decreasing_color > option:nth-child(3) {
+  color: #d00631;
+}
+#id_decreasing_color > option:nth-child(4) {
+  color: #006400;
+}
+#id_decreasing_color > option:nth-child(5) {
+  color: #ff00ff;
+}
+#id_decreasing_color > option:nth-child(6) {
+  color: #8a2be2;
+}
+#id_decreasing_color > option:nth-child(7) {
+  color: #ff6600;
+}
+#id_decreasing_color > option:nth-child(8) {
+  color: #a0522d;
+}
+#id_decreasing_color > option:nth-child(9) {
+  color: #daa520;
+}
+#id_decreasing_color > option:nth-child(10) {
+  color: #000000;
+}
+#id_decreasing_color > option:nth-child(11) {
+  color: #12FEFF;
+}
+#id_decreasing_color > option:nth-child(12) {
+  color: #08FE04;
+}
+#id_increasing_color > option:nth-child(2) {
+  color: #00008b;
+}
+#id_increasing_color > option:nth-child(3) {
+  color: #d00631;
+}
+#id_increasing_color > option:nth-child(4) {
+  color: #006400;
+}
+#id_increasing_color > option:nth-child(5) {
+  color: #ff00ff;
+}
+#id_increasing_color > option:nth-child(6) {
+  color: #8a2be2;
+}
+#id_increasing_color > option:nth-child(7) {
+  color: #ff6600;
+}
+#id_increasing_color > option:nth-child(8) {
+  color: #a0522d;
+}
+#id_increasing_color > option:nth-child(9) {
+  color: #daa520;
+}
+#id_increasing_color > option:nth-child(10) {
+  color: #000000;
+}
+#id_increasing_color > option:nth-child(11) {
+  color: #12FEFF;
+}
+#id_increasing_color > option:nth-child(12) {
+  color: #08FE04;
+}
+#id_line_color > option:nth-child(2) {
+  color: #00008b;
+}
+#id_line_color > option:nth-child(3) {
+  color: #d00631;
+}
+#id_line_color > option:nth-child(4) {
+  color: #006400;
+}
+#id_line_color > option:nth-child(5) {
+  color: #ff00ff;
+}
+#id_line_color > option:nth-child(6) {
+  color: #8a2be2;
+}
+#id_line_color > option:nth-child(7) {
+  color: #ff6600;
+}
+#id_line_color > option:nth-child(8) {
+  color: #a0522d;
+}
+#id_line_color > option:nth-child(9) {
+  color: #daa520;
+}
+#id_line_color > option:nth-child(10) {
+  color: #000000;
+}
+#id_line_color > option:nth-child(11) {
+  color: #12FEFF;
+}
+#id_line_color > option:nth-child(12) {
+  color: #08FE04;
+}
+
+
+
+

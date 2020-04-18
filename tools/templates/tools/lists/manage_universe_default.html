@@ -1,0 +1,96 @@
+{% extends "tools/lists/base_universes.html" %}
+
+{% block content %}
+{% if not error_message %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{universe.title}}</h4>
+    </div>
+    {% if user.is_superuser %}
+    <a href="#" class="btn btn-primary margin-right-5 " data-toggle="modal" data-target="#myModal_add">
+        Add Instrument
+    </a>
+    {% endif %}
+    <table id="example" class="table table-striped table-bordered" style="width:100%;margin-top:10px">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                {% if user.is_superuser%}
+                <th>Delete</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for instrument in instruments %}
+            <tr>
+                <td>{{instrument.0}}</td>
+                <td>{{instrument.1}}</td>
+                {% if user.is_superuser%}
+                <td><a class="danger remove confirm-delete" href="#" data-toggle="modal" data-target="#myModal"
+                        data-symbol="{{instrument.0}}" title="Delete">
+                        <i class="fa fa-trash"></i>Delete
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:lists_delete_instrument_default' id=universe.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="symbol" id="delete_symbol" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="myModal_add" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:lists_add_instrument_default' id=universe.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h3>Add to List</h3>
+                </div>
+                <div class="modal-body">
+                    <label>Symbol: </label>
+                    <input type="text" class="form-control" name="symbol" />
+                    <label>Name: </label>
+                    <input type="text" class="form-control" name="name" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var token = '{{csrf_token}}';
+    var selectedInstrument = []
+    var table = $('#table_operation');
+    $(document).ready(function () {
+        $('#example').DataTable();
+        $(document).on("click", ".confirm-delete", function () {
+            $("#delete_symbol").val($(this).data('symbol'));
+        })
+    });
+
+</script>
+{% else %}
+
+{% endif %}
+{% endblock %}

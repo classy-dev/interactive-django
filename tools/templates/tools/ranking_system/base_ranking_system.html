@@ -1,0 +1,59 @@
+{% extends "tools/base_tools.html" %}
+
+{% load static %}
+
+{% block sidebar %}
+<ul class="nav flex-column pl-1">
+    <div class="navbar-button">
+        <a href="{% url 'tools:rank_create_folder' %}"><img src="{% static 'img/add.png' %}" width="30px" height="30px"
+                title="Create Folder" /></a>
+        <a href="{% url 'tools:rank_delete_folder' %}"><img src="{% static 'img/delete.png' %}" width="30px"
+                height="30px" title="Delete Folder"></a>
+    </div>
+    <li class="nav-item">
+        <h5><a href="{% url 'tools:rank_manage_rank_systems_folder' parent_id=0 %}">Ranking System Structure</a></h5>
+    </li>
+    <div id="jstree-tree" class="well col-sm-3"></div>
+</ul>
+{% endblock %}
+
+{% block subjs %}
+<script>
+    var tree_structure = "{{tree_structure|safe}}";
+    if (tree_structure) {
+        tree_structure = tree_structure.replace(/'/g, '"');
+        tree_structure = JSON.parse(tree_structure)
+        $('#jstree-tree')
+            .on('select_node.jstree', function (e, data) {
+                var objNode = data.instance.get_node(data.selected);
+                if (objNode) {
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'tools:rank_get_data' %}",
+                        data: {
+                            "id": objNode.id
+                        },
+                        success: function (data) {
+                            if (data.child_type == 2 ) {
+                                var url = "{% url 'tools:rank_manage_ranking_system' id=123 %}"
+                                location.href = url.replace('123', data.child_id)
+                            }
+                            if (data.child_type == 1 && data.permission == 0) {
+                                var url = "{% url 'tools:rank_manage_rank_systems_folder' parent_id=123 %}"
+                                location.href = url.replace('123', data.child_id)
+                            }
+                            if (data.child_type == 1 && data.permission == 1) {
+                                location.href = "{% url 'tools:rank_manage_default_systems' %}"
+                            }
+                        }
+                    })
+                }
+            })
+            .jstree({
+                core: {
+                    data: tree_structure
+                }
+            });
+    }
+</script>
+{% endblock %}

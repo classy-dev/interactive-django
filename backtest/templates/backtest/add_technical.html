@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Backtest Technicals: </h2>
+{% for technical in technicals %}
+    <p>
+       <li> {{ technical }} <a href="{% url 'delete_technical' id_technical=technical.id id_rule=id_rule id_strategy=id_strategy %}">  Delete </a> </li>
+    </p>
+{% empty %}
+    <p>No technical!</p>
+{% endfor %}
+       <li>
+       <a href="{% url 'backtest:add_indicator' indicator="Constant" id_rule=id_rule id_strategy=id_strategy %}"> [Add constant] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="BarSinceEntry" id_rule=id_rule id_strategy=id_strategy %}"> [Add bars since Entry] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="OpenDS" id_rule=id_rule id_strategy=id_strategy %}"> [Add Open] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="HighDS" id_rule=id_rule id_strategy=id_strategy %}"> [Add High] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="LowDS" id_rule=id_rule id_strategy=id_strategy %}"> [Add Low] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="PriceDS" id_rule=id_rule id_strategy=id_strategy %}"> [Add Price] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Sma" id_rule=id_rule id_strategy=id_strategy %}"> [Add Sma] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Slope" id_rule=id_rule id_strategy=id_strategy %}"> [Add Slope] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Rsi" id_rule=id_rule id_strategy=id_strategy %}"> [Add Rsi] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Roc" id_rule=id_rule id_strategy=id_strategy %}"> [Add Roc] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Ppo" id_rule=id_rule id_strategy=id_strategy %}"> [Add Ppo] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Ema" id_rule=id_rule id_strategy=id_strategy %}"> [Add Ema] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Atrn" id_rule=id_rule id_strategy=id_strategy %}"> [Add Atrn] </a>
+       <a href="{% url 'backtest:add_indicator' indicator="Adx" id_rule=id_rule id_strategy=id_strategy %}"> [Add Adx] </a>
+       </li>
+{% endblock content %}

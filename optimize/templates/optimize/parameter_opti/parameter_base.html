@@ -1,0 +1,71 @@
+{% extends "optimize/optimize_base.html" %}
+
+{% load static %}
+
+{% block sidebar %}
+<div class="navbar-button">
+    <a href="#"><img src="{% static 'img/add.png' %}" width="30px"
+            height="30px" /></a>
+    <a href="#"><img src="{% static 'img/delete.png' %}" width="30px"
+            height="30px"></a>
+</div>
+<ul class="nav flex-column pl-1">
+    <li class="nav-item">
+        <h5><a href="#">Strategy List</a></h5>
+    </li>
+    <div id="jstree-tree" class="well col-sm-3"></div>
+</ul>
+{% endblock %}
+
+{% block mainnav %}
+<nav class="navbar navbar-fixed-top navbar-toggleable-sm navbar-inverse bg-primary mb-3 customnavbacktest">
+    <ul class="navbar-nav">
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest menu_custom" href="#">Strategy</a>
+        </li>
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest menu_custom" href="#">Results</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
+{% block subjs %}
+<script>
+    $(document).ready(function () {
+        toastr.options = {
+            'closeButton': true,
+            'debug': false,
+            'newestOnTop': false,
+            'progressBar': true,
+            'positionClass': 'toast-top-right',
+            'preventDuplicates': false,
+            'showDuration': '1000',
+            'hideDuration': '1000',
+            'timeOut': '5000',
+            'extendedTimeOut': '1000',
+            'showEasing': 'swing',
+            'hideEasing': 'linear',
+            'showMethod': 'fadeIn',
+            'hideMethod': 'fadeOut',
+        }
+    })
+    var tree_structure = "{{tree_structure|safe}}";
+    if (tree_structure) {
+        tree_structure = tree_structure.replace(/'/g, '"');
+        tree_structure = JSON.parse(tree_structure)
+        $('#jstree-tree')
+            .on('select_node.jstree', function (e, data) {
+            })
+            .jstree({
+                core: {
+                    data: tree_structure
+                }
+            });
+    }
+    var error_message = "{{error_message|safe}}"
+    if (error_message) {
+        toastr.error(error_message)
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+1. Celery install (pip install celery)
+2. python-celery-common install (pip install python-celery-common)
+3. Rund this command in project folder.
+	celery -A InderativeAlpha worker -l info
+4. Run project
+	python3 manage.py runserver [port num]
+
+########################################################
+if you already have installed the celery package and python-celery-common package, step1 and step2 needn't you.

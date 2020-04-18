@@ -1,0 +1,95 @@
+{% extends "tools/base_tools.html" %}
+
+{% load static %}
+
+{% block sidebar %}
+<ul class="nav flex-column pl-1">
+    <div id="jstree-tree" class="well col-sm-3"></div>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="{% url 'tools:rank_add_ranking_rule' id=rank_system_id %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" value="Add this rule" class="btn btn-primary" />
+                    <a class="btn btn-primary"
+                        href="{% url 'tools:rank_manage_ranking_system' id=rank_system_id %}">Back to my
+                        ranking system</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <p>Indicators Available:</p>
+            <input class="form-control technical"></input>
+        </div>
+    </div>
+</div>
+<div id="modal-div"></div>
+<script>
+    var token = '{{csrf_token}}';
+    var rank_id = "{{rank_system_id}}";
+    var modalDiv = $("#modal-div");
+    var flag = false;
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:rank_get_indicator" id_rank=rank_system_id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('.technical').tagEditor({
+                    initialTags: rules,
+                    beforeTagDelete: function (field, editor, tags, val) {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            method: "GET",
+                            url: '{% url "tools:rank_get_indicator_add" %}',
+                            data: {
+                                'techindicator': val,
+                                'id_rank': rank_id,
+                                'from': 'add',
+                            },
+                            success: function (data) {
+                                modalDiv.html(data);
+                                $("#myEdit").modal('show');
+                            }
+                        })
+                        return flag;
+                    },
+                });
+                $('#indicator').tagEditor({ initialTags: [] });
+            }
+        });
+    });
+    var indicator_tree = "{{indicator_tree|safe}}";
+    if (indicator_tree) {
+        indicator_tree = indicator_tree.replace(/'/g, '"');
+        indicator_tree = JSON.parse(indicator_tree)
+        var action_url = "{% url 'tools:rank_add_indicator' source='add' indicator='000000' id_rank=rank_system_id %}";
+        $('#jstree-tree')
+            .on('select_node.jstree', function (e, data) {
+                var objNode = data.instance.get_node(data.selected)
+                if (objNode.parent != "#") {
+                    $.ajax({
+                        url: action_url.replace('000000', objNode.text),
+                        success: function (data) {
+                            modalDiv.html(data);
+                            $("#myEdit").modal('show');
+                        }
+                    })
+                }
+            })
+            .jstree({
+                core: {
+                    data: indicator_tree
+                }
+            });
+    }
+</script>
+{% endblock content %}

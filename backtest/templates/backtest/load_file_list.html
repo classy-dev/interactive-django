@@ -1,0 +1,38 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'backtest:load_strategy_list' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Backtest Strategy Load List</h2>
+                <label>File List:</label>
+                <select class="form-control" name="file_name" required>
+                    {% for file in load_list %}
+                    <option value="{{ file  }}">{{ file }}</option>
+                    {% endfor %}
+                </select>
+                <label>Parent Folder:</label>
+                <select class="form-control" name="parent_id" required>
+                    {% if user.is_superuser %}
+                    <option value="d">Default folder</option>
+                    {% endif %}
+                    <option value="0">Top level</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{category.path}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Add" class="btn btn-primary pull-right" style="margin-top: 30px" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<script>
+
+</script>
+{% endblock content %}

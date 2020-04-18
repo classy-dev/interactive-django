@@ -1,0 +1,89 @@
+{% extends "tools/base_tools.html" %}
+
+{% load static %}
+
+{% block subcss %}
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.6.3/css/all.css" />
+<link rel="stylesheet" href="//unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" />
+<link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css"
+    rel="stylesheet" />
+{% endblock %}
+
+{% block sidebar %}
+<ul class="nav flex-column pl-1">
+    <div class="navbar-button">
+        <a href="{% url 'tools:create_folder' %}"><img src="{% static 'img/add.png' %}" width="30px" height="30px"
+                title="Create Folder" /></a>
+        <a href="{% url 'tools:delete_folder' %}"><img src="{% static 'img/delete.png' %}" width="30px" height="30px"
+                title="Delete Folder"></a>
+    </div>
+    <li class="nav-item">
+        <h5><a href="{% url 'tools:manage_universes' id=0 %}">Universe Structure</a></h5>
+    </li>
+    <div id="jstree-tree" class="well col-sm-3"></div>
+</ul>
+{% endblock %}
+
+{% block mainnav %}
+<nav class="navbar navbar-fixed-top navbar-toggleable-sm navbar-inverse bg-primary mb-3 customnavbacktest">
+    <ul class="navbar-nav">
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest menu_custom"
+                href="{% url 'tools:manage_universe_default' %}">Universe</a>
+        </li>
+        <li class="nav-item text-center">
+            <a class="nav-link customlinkbacktest menu_custom" href="{% url 'tools:manage_boolean_operation' %}">Boolean Operations</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
+
+{% block subjs %}
+<script>
+    var tree_structure = "{{tree_structure|safe}}";
+    tree_structure = tree_structure.replace(/'/g, '"');
+    tree_structure = JSON.parse(tree_structure)
+
+    $('#jstree-tree')
+        .on('select_node.jstree', function (e, data) {
+            var objNode = data.instance.get_node(data.selected);
+            if (objNode) {
+                $.ajax({
+                    method: "GET",
+                    url: "{% url 'tools:ajax_get_treeelement' %}",
+                    data: {
+                        "id": objNode.id
+                    },
+                    success: function (data) {
+                        if (data.child_type == 2 && data.permission == 0) {
+                            var url = "{% url 'tools:manage_universe' id=123 %}"
+                            location.href = url.replace('123', data.child_id)
+                        }
+                        else if (data.child_type == 2 && data.permission == 1) {
+                            var url = "{% url 'tools:manage_default_universe' id=123 %}"
+                            location.href = url.replace('123', data.child_id)
+                        }
+                        else if (data.child_type == 1 && data.permission == 0) {
+                            var url = "{% url 'tools:manage_universes' id=123 %}"
+                            location.href = url.replace('123', data.child_id)
+                        }
+                        else if (data.child_type == 1 && data.permission == 1) {
+                            location.href = "{% url 'tools:manage_universes_default' %}"
+                        }
+                    }
+                })
+            }
+        })
+        .jstree({
+            core: {
+                data: tree_structure
+            }
+        });
+</script>
+<script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+<script src="//unpkg.com/bootstrap-table@1.15.4/dist/bootstrap-table.min.js"></script>
+<script type="text/javascript"
+    src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+{% endblock %}

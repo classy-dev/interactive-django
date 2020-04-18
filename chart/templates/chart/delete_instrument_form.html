@@ -1,0 +1,14 @@
+{% extends "chart/chart_base.html" %}
+
+{% block content %}
+    <div class="col-md-4 col-md-offset-4 form-type">
+        <h2>Delete Instrument</h2>
+        <form method="POST" action="{% url 'chart:m_delete_instrument' list_id=l_id chart_id=c_id instrument_id=instrument.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Delete</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

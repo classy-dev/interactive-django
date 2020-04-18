@@ -1,0 +1,20 @@
+{% extends "chart/chart_base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h3 class="text-center">Modify Mode</h3><hr>
+            <div class="alert alert-info">Select the modification mode.</div>
+            <ul class="nav nav-tabs process-model more-icon-preocess" role="tablist">
+              <li role="presentation" id="change_name" class="active"><i class="fa fa-exchange" aria-hidden="true"></i>
+                  <p><a href="{% url 'chart:m_change_name' list_id=list_id chart_id=c_id %}">Change Name</a></p></li>
+              <li role="presentation" id="add_instrument" class="active"><i class="fa fa-plus" aria-hidden="true"></i>
+                  <p><a href="{% url 'chart:m_add_instrument' list_id=list_id chart_id=c_id %}">Add Instrument</a></p></li>
+              <li role="presentation" id="delete_instrument" class="active"><i class="fa fa-remove" aria-hidden="true"></i>
+                <p><a href="{% url 'chart:get_delete_instruments' list_id=list_id chart_id=c_id %}">Delete Instrument</a></p></li>
+            </ul>
+            <div class="col-md-12 text-right" style="margin-top: 20px;">
+                <a href="{% url 'chart:view_chart' %}" class="btn btn-outline-dark">Back</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

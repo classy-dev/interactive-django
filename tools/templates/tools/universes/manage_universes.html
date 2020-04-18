@@ -1,0 +1,148 @@
+{% extends "tools/universes/base_universes.html" %}
+
+{% block content %}
+<div class="table-container">
+    {% if top_folder %}
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{title}}</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        {# <a href="{% url 'backtest:rename_category' %}" class="btn btn-primary margin-right-5"> Rename Folder </a> #}
+        <a href="{% url 'tools:create_universe' %}" class="btn btn-primary margin-right-5">Create Universe </a>
+        {% if user.is_superuser and top_folder %}
+        <a href="#" class="btn btn-primary margin-right-5 js-upload-photos"><span class="fa fa-upload"></span>
+            Load Default Universe </a>        
+        <input id="fileupload" type="file" name="file" multiple style="display: none;"
+            data-url="{% url 'tools:upload_universe' %}" data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+        {% endif %}
+    </div>
+    <table class="table sortable" style="margin-top:10px">
+        <tr>
+            <th>Name</th>
+            <th>Number of Instruments</th>
+            {% if user.is_superuser%}
+            <th>Delete</th>
+            {% endif %}
+        </tr>
+        {% for universe in universe_lists %}
+        <tr>
+            <td><a href="{% url 'tools:manage_default_universe' id=universe.id %}">{{universe.title}}</a></td>
+            <td>{{universe.count}}</td>
+            {% if user.is_superuser%}
+            <td><a href="#" class="confirm-delete"
+                    data-toggle="modal" data-target="#myModal" data-id="{{universe.id}}"><i class="fa fa-trash"
+                        aria-hidden="true"></i> Delete </a></td>
+            {%  endif %}
+        </tr>
+        {% empty %}
+        <td>No Universe!</td>
+        {% endfor %}
+    </table>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:delete_universe_default' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="id" id="deleteid" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Uploading...</h4>
+            </div>
+            <div class="modal-body">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="displayoposite">
+    <h4 class="strategy_title">{{title}}</h4>
+</div>
+<div class="btn-group flex-wrap" role="group">
+    {# <a href="{% url 'backtest:rename_category' %}" class="btn btn-primary margin-right-5"> Rename Folder </a> #}
+    <a href="{% url 'tools:create_universe' %}"
+        class="btn btn-primary margin-right-5 {% if not user.is_superuser and top_folder %}disabled{% endif %}">
+        Create Universe </a>
+    {#<a href="#" class="btn btn-primary margin-right-5 js-upload-photos" {% if not user.is_superuser and top_folder %} style="display: none;" {% endif %}> Load Universe </a>#}
+    <input id="fileupload" type="file" name="file" multiple style="display: none;"
+        data-url="{% url 'tools:upload_universe' %}" data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+
+</div>
+<table class="table sortable" style="margin-top:10px">
+    <tr>
+        <th>Name</th>
+        <th>Number of Instruments</th>
+        <th>Delete</th>
+    </tr>
+    {% for universe in universe_lists %}
+    <tr>
+        <td><a href="{% url 'tools:manage_universe' id=universe.id %}">{{universe}}</a></td>
+        <td>{{universe.count}}</td>
+        <td><a href="#" class="confirm-delete {% if not user.is_superuser and top_folder %}disabled{% endif %}"
+                data-toggle="modal" data-target="#myModal" data-id="{{universe.id}}"><i class="fa fa-trash"
+                    aria-hidden="true"></i> Delete </a></td>
+    </tr>
+    {% empty %}
+    <td>No Universe!</td>
+    {% endfor %}
+</table>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:delete_universe' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="id" id="deleteid" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Uploading...</h4>
+            </div>
+            <div class="modal-body">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    $(document).ready(function () {
+        $(document).on("click", ".confirm-delete", function () {
+            $("#deleteid").val($(this).data('id'))
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{% url "backtest:delete_technical" id_technical=technical.id id_rule=id_rule id_strategy=id_strategy %}" method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete this technical "{{ technical }}"?</p>
+    {{ form.as_p }}
+    <input type="submit" value="Confirm" />
+</form>
+{% endblock content %}

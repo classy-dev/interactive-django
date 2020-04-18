@@ -1,0 +1,19 @@
+{% extends "chart/chart_base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h3 class="text-center">Delete Instrument List</h3><hr>
+            <ul class="list-group">
+                {% for instrument in instruments %}
+                    <li class="list-group-item list-group-item-action">{{ instrument.name }}
+                        <a href="{% url 'chart:m_delete_instrument' instrument_id=instrument.id chart_id=c_id list_id=l_id %}" class="pull-right">
+                        <i class="fa fa-trash" style="color:red"></i></a></li>
+                {% endfor %}
+            </ul>
+        <div class="clearfix"></div>
+        <div class="col-md-12 text-right" style="margin-top: 20px;">
+            <a href="{% url 'chart:select_modify_mode' list_id=l_id chart_id=c_id %}" class="pull-right">Back</a>
+        </div>
+        </div>
+    </div>
+{% endblock content %}

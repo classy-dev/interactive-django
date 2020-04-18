@@ -1,0 +1,16 @@
+{% extends "base_modify_modal.html" %}
+{% block actionURL %}
+{% url 'tools:rank_modifytechnical' indicator=indicator tech_id=tech_id id_rank=id_rank requestfrom=requestfrom requestrule=requestrule %}
+{% endblock %}
+{% block title %}
+{{ indicator_property.name }}
+{% endblock %}
+{% block description %}
+{{ indicator_property.description }}
+{% endblock %}
+{% block content %}
+{{ form.as_p }}
+{% endblock content %}
+{% block deleteURL %}
+{% url 'tools:rank_deletetechnical' tech_id=tech_id id_rank=id_rank requestfrom=requestfrom requestrule=requestrule %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "tools/benchmarks/base_universes.html" %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'tools:benchmarks_create_universe' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Create Benchmark</h2>
+                <label>Name:</label>
+                <input type="text" name="universe_name" class="form-control" required>
+                <label>Parent Folder:</label>
+                <select class="form-control" name="parent_id" required>
+                    <option value="0">Top level</option>
+                    {% for folder in folders %}
+                    <option value="{{ folder.id }}">{{folder.path}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Confirm" class="btn btn-primary pull-right" style="margin-top: 30px" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'backtest/comb_strategy/comb_strategy_base.html' %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'backtest:comb_add_strategy' id_comb_strategy=id_comb_strategy %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Strategy List</h2>
+                <table class="table">
+                    <tbody>
+                        {% for strategy in strategies %}
+                        <tr>
+                            <td>{{strategy}}</td>
+                            <td><input type="checkbox" class="form-control" name="strategy[]" value="{{strategy.id}}">
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td>No Strategies</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a class="btn btn-primary pull-right" style="margin-top: 30px" href="{% url 'backtest:comb_manage_strategy' id_strategy=id_comb_strategy %}">Back to my strategy</a>
+                <input type="submit" value="Add" class="btn btn-primary pull-right" style="margin-top: 30px; margin-right: 4px;" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+{% endblock %}

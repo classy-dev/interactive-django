@@ -1,0 +1,14 @@
+{% extends "base1.html" %}
+
+{% load static %}
+{% block content %}
+<div class='phone-img'>
+    <img src='{% static "img/phone2.png" %}' alt />
+</div>
+<div class="account-btn" style="margin: 30px"> 
+    <div>
+        <a class="btn btn-primary btn-lg" href="{% url 'account:login' %}">Log in</a>
+        <a class="btn btn-primary btn-lg" href="{% url 'account:signup' %}">Sign up</a>  
+    </div>    
+</div>
+{% endblock %}

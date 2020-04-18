@@ -1,0 +1,545 @@
+{% extends 'backtest/comb_strategy/comb_strategy_base.html' %}
+
+{% block content %}
+
+{% if strategy %}
+<div class="table-container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-12">
+            <h4 class="strategy_title">STRATEGY TITLE: {{relative_path}}{{ strategy.name }}</h4>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-6">
+            <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+            <select id="graphselector" class="pull-right">
+                <option value="1">Invested</option>
+                <option value="2">NAV</option>
+                <option value="3">Bench</option>
+                <option value="4">Drawdown</option>
+                <option value="5">Annual returns</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Total Return</td>
+                        <td {% if Results.Total_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Total_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benchmark Return</td>
+                        <td {% if Results.Benchmark_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Benchmark_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Annualized Return</td>
+                        <td {% if Results.Annualized_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Annualized_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Max Drowdown</td>
+                        <td {% if Results.Max_Drowdown < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Max_Drowdown }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benchmark Max Drowdown</td>
+                        <td {% if Results.Benchmark_Max_Drowdown < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Benchmark_Max_Drowdown }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Winner Percentage</td>
+                        <td {% if Results.Winner_Percentage < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Winner_Percentage }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sharpe Ratio</td>
+                        <td {% if Results.Sharpe_Ratio < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Sharpe_Ratio }}%
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <table class="table sortable table-responsive">
+                <thead>
+                    <th>Date</th>
+                    <th>Instrument</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                    <th>Fee</th>
+                    <th>Rule Name</th>
+                    <th>Date</th>
+                    <th>Instrument</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                    <th>Fee</th>
+                    <th>Rule Name</th>
+                </thead>
+                <tbody>
+                    {% for trade in Results.Trades %}
+                    <tr>
+                        {% for value in trade %}
+                        <td {% if value < 0 %}style="color:red" {% endif %}>
+                            {{ value }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-primary" href="{% url 'backtest:comb_manage_strategy' id_strategy=strategy.id %}">back to my strategy</a>
+        </div>
+    </div>
+</div>
+<script>    
+    var dataPoints1 = [];
+    var dataPoints2 = [];
+    var dataPoints3 = [];
+    var dataPoints4 = [];
+    var dataPoints5 = [];
+    var benchmark_return = "{{Results.Benchmark_return|safe}}";
+    benchmark_return = benchmark_return.replace(/'/g, '"');
+    benchmark_return = JSON.parse(benchmark_return);  
+
+    benchmark_return.forEach(each => {
+        dataPoints1.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var cummulative_returns = "{{Results.Cummulative_returns|safe}}";
+    cummulative_returns = cummulative_returns.replace(/'/g, '"');
+    cummulative_returns = JSON.parse(cummulative_returns);
+
+    cummulative_returns.forEach(each => {
+        dataPoints2.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var invested = "{{Results.invested|safe}}";
+    invested = invested.replace(/'/g, '"');
+    invested = JSON.parse(invested);
+
+    invested.forEach(each => {
+        dataPoints3.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var drawdown = "{{Results.DrawDown|safe}}";
+    drawdown = drawdown.replace(/'/g, '"');
+    drawdown = JSON.parse(drawdown);
+
+    drawdown.forEach(each => {
+        dataPoints4.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var annual_returns = "{{Results.Annual_returns|safe}}";
+    annual_returns = annual_returns.replace(/'/g, '"');
+    annual_returns = JSON.parse(annual_returns);
+
+    annual_returns.forEach(each => {
+        dataPoints5.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var chartData = [
+        {
+            type: "line",
+            name: "Bench",
+            color: "#0000FF",
+            showInLegend: true,
+            dataPoints: dataPoints1
+        },
+        {
+            type: "line",
+            name: "NAV",
+            color: "#FF0000",
+            showInLegend: true,
+            dataPoints: dataPoints2
+        }
+    ];
+    window.onload = function () {
+        var chart = new CanvasJS.Chart("chartContainer", {
+            title: {
+                text: "NAV VS Bench"
+            },
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                itemclick: toggleDataSeries
+            },
+            data: chartData
+        });
+
+        chart.render();
+
+        function toggleDataSeries(e) {
+            if (typeof e.dataSeries.visible === "undefined" || e.dataSeries.visible) {
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            e.chart.render();
+        }
+    };
+        $("#graphselector").change(function(){
+            var title = ''
+            switch(this.value){
+                case "1" : { 
+                    title = "Invested";
+                    chartData = [{
+                        type: "line",
+                        name: "Invested",
+                        color: "#009933",
+                        showInLegend: true,
+                        dataPoints: dataPoints3
+                    }]; break; } 
+                case "2" : { 
+                    title = "NAV";
+                    chartData = [{
+                        type: "line",
+                        name: "NAV",
+                        color: "#FF0000",
+                        showInLegend: true,
+                        dataPoints: dataPoints2
+                    }]; break; } 
+                case "3" : { 
+                    title = "Bench";
+                    chartData = [{
+                        type: "line",
+                        name: "Bench",
+                        color: "#0000FF",
+                        showInLegend: true,
+                        dataPoints: dataPoints1
+                    }]; break; }  
+                case "4" : { 
+                    title = "DrawDown";
+                    chartData = [{
+                        type: "line",
+                        name: "DrawDown",
+                        color: "#00264d",
+                        showInLegend: true,
+                        dataPoints: dataPoints4
+                    }]; break; } 
+                case "5" : { 
+                    title = "Annual return";
+                    chartData = [{
+                        type: "line",
+                        name: "Annual return",
+                        color: "#00FF00",
+                        showInLegend: true,
+                        dataPoints: dataPoints5
+                    }]; break; 
+                    }                  
+            }
+            var chart = new CanvasJS.Chart("chartContainer", {
+                title: {
+                    text: title
+                },
+                toolTip: {
+                    shared: true
+                },
+                legend: {
+                    cursor: "pointer",
+                    itemclick: toggleDataSeries
+                },
+                data: chartData
+            });
+            chart.render();
+            function toggleDataSeries(e) {
+                if (typeof e.dataSeries.visible === "undefined" || e.dataSeries.visible) {
+                    e.dataSeries.visible = false;
+                } else {
+                    e.dataSeries.visible = true;
+                }
+                e.chart.render();
+            }
+        });
+</script>
+{% elif noavaliable %}
+{{ noavaliable }}
+<script>
+
+</script>
+{% else %}
+{% if nostrategy %}
+{{nostrategy}}
+<script>
+</script>
+{% else %}
+<div class="table-container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-12">
+            <h4 class="strategy_title">STRATEGY TITLE: {{relative_path}} {{ selectstrategy.name }}</h4>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-6">
+            <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+            <select id="graphselector" class="pull-right">
+                <option value="1">Invested</option>
+                <option value="2">NAV</option>
+                <option value="3">Bench</option>
+                <option value="4">Drawdown</option>
+                <option value="5">Annual returns</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Total Return</td>
+                        <td {% if Results.Total_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Total_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benchmark Return</td>
+                        <td {% if Results.Benchmark_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Benchmark_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Annualized Return</td>
+                        <td {% if Results.Annualized_Return < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Annualized_Return }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Max Drowdown</td>
+                        <td {% if Results.Max_Drowdown < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Max_Drowdown }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benchmark Max Drowdown</td>
+                        <td {% if Results.Benchmark_Max_Drowdown < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Benchmark_Max_Drowdown }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Winner Percentage</td>
+                        <td {% if Results.Winner_Percentage < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Winner_Percentage }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sharpe Ratio</td>
+                        <td {% if Results.Sharpe_Ratio < 0 %}style="color:red" {% endif %}>
+                            {{ Results.Sharpe_Ratio }}%
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <table class="table sortable table-responsive">
+                <thead>
+                    <th>Date</th>
+                    <th>Instrument</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                    <th>Fee</th>
+                    <th>Rule Name</th>
+                    <th>Date</th>
+                    <th>Instrument</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                    <th>Fee</th>
+                    <th>Rule Name</th>
+                </thead>
+                <tbody>
+                    {% for trade in Results.Trades %}
+                    <tr>
+                        {% for value in trade %}
+                        <td {% if value < 0 %}style="color:red" {% endif %}>
+                            {{ value }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-primary" href="{% url 'backtest:comb_manage_strategy' id_strategy=selectstrategy.id %}">back to my strategy</a>
+        </div>
+    </div>
+</div>
+<script>   
+    var dataPoints1 = [];
+    var dataPoints2 = [];
+    var dataPoints3 = [];
+    var dataPoints4 = [];
+    var dataPoints5 = [];
+    var benchmark_return = "{{Results.Benchmark_return|safe}}";
+    benchmark_return = benchmark_return.replace(/'/g, '"');
+    benchmark_return = JSON.parse(benchmark_return);  
+
+    benchmark_return.forEach(each => {
+        dataPoints1.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var cummulative_returns = "{{Results.Cummulative_returns|safe}}";
+    cummulative_returns = cummulative_returns.replace(/'/g, '"');
+    cummulative_returns = JSON.parse(cummulative_returns);
+
+    cummulative_returns.forEach(each => {
+        dataPoints2.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var invested = "{{Results.invested|safe}}";
+    invested = invested.replace(/'/g, '"');
+    invested = JSON.parse(invested);
+
+    invested.forEach(each => {
+        dataPoints3.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var drawdown = "{{Results.DrawDown|safe}}";
+    drawdown = drawdown.replace(/'/g, '"');
+    drawdown = JSON.parse(drawdown);
+
+    drawdown.forEach(each => {
+        dataPoints4.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var annual_returns = "{{Results.Annual_returns|safe}}";
+    annual_returns = annual_returns.replace(/'/g, '"');
+    annual_returns = JSON.parse(annual_returns);
+
+    annual_returns.forEach(each => {
+        dataPoints5.push({ x: new Date(each[0]), y: each[1] });
+    });
+
+    var chartData = [
+        {
+            type: "line",
+            name: "Bench",
+            color: "#0000FF",
+            showInLegend: true,
+            dataPoints: dataPoints1
+        },
+        {
+            type: "line",
+            name: "NAV",
+            color: "#FF0000",
+            showInLegend: true,
+            dataPoints: dataPoints2
+        }
+    ];
+    window.onload = function () {
+        var chart = new CanvasJS.Chart("chartContainer", {
+            title: {
+                text: "NAV VS Bench"
+            },
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                itemclick: toggleDataSeries
+            },
+            data: chartData
+        });
+
+        chart.render();
+
+        function toggleDataSeries(e) {
+            if (typeof e.dataSeries.visible === "undefined" || e.dataSeries.visible) {
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            e.chart.render();
+        }
+    };
+        $("#graphselector").change(function(){
+            var title = ''
+            switch(this.value){
+                case "1" : { 
+                    title = "Invested";
+                    chartData = [{
+                        type: "line",
+                        name: "Invested",
+                        color: "#009933",
+                        showInLegend: true,
+                        dataPoints: dataPoints3
+                    }]; break; } 
+                case "2" : { 
+                    title = "NAV";
+                    chartData = [{
+                        type: "line",
+                        name: "NAV",
+                        color: "#FF0000",
+                        showInLegend: true,
+                        dataPoints: dataPoints2
+                    }]; break; } 
+                case "3" : { 
+                    title = "Bench";
+                    chartData = [{
+                        type: "line",
+                        name: "Bench",
+                        color: "#0000FF",
+                        showInLegend: true,
+                        dataPoints: dataPoints1
+                    }]; break; }  
+                case "4" : { 
+                    title = "DrawDown";
+                    chartData = [{
+                        type: "line",
+                        name: "DrawDown",
+                        color: "#00264d",
+                        showInLegend: true,
+                        dataPoints: dataPoints4
+                    }]; break; } 
+                case "5" : { 
+                    title = "Annual return";
+                    chartData = [{
+                        type: "line",
+                        name: "Annual return",
+                        color: "#00FF00",
+                        showInLegend: true,
+                        dataPoints: dataPoints5
+                    }]; break; 
+                    }                  
+            }
+            var chart = new CanvasJS.Chart("chartContainer", {
+                title: {
+                    text: title
+                },
+                toolTip: {
+                    shared: true
+                },
+                legend: {
+                    cursor: "pointer",
+                    itemclick: toggleDataSeries
+                },
+                data: chartData
+            });
+            chart.render();
+            function toggleDataSeries(e) {
+                if (typeof e.dataSeries.visible === "undefined" || e.dataSeries.visible) {
+                    e.dataSeries.visible = false;
+                } else {
+                    e.dataSeries.visible = true;
+                }
+                e.chart.render();
+            }
+        });
+</script>
+{% endif %}
+{% endif %}
+{% endblock content %}

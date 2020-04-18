@@ -1,0 +1,30 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'backtest:add_category' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Add Folder</h2>
+                <label>Name:</label>
+                <input type="text" name="category_name" class="form-control" required>
+                <label>Parent Folder:</label>
+                <select class="form-control" name="parent_id" required>
+                    <option value="0">Top level</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{category.path}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Add" class="btn btn-primary pull-right" style="margin-top: 30px" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<script>
+</script>
+{% endblock content %}

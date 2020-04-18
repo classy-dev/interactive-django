@@ -1,0 +1,78 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{title}}</h4>
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+        {# <a href="{% url 'backtest:rename_category' %}" class="btn btn-primary margin-right-5"> Rename Folder </a> #}
+        <a href="{% url 'backtest:add_strategy' %}" class="btn btn-primary margin-right-5"> Add Strategy </a>
+        <a href="{% url 'backtest:load_strategy_list' %}" class="btn btn-primary">Load Strategy </a>
+    </div>
+    <table class="table sortable" style="margin-top:10px">
+        <tr>
+            <th>Strategy</th>
+            <th>StartDate</th>
+            <th>EndDate</th>
+            <th>Annual Return</th>
+            <th>Sharpe Ratio</th>
+            <th>Drowdown</th>
+            {% if user.is_superuser %}
+            <th>delete</th>
+            <th>change folder</th>
+            <th>export</th>            
+            {% else %}
+            <th>export</th>
+            {% endif %}
+        </tr>
+        {% for strategy in strategies %}
+        <tr>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy}}</a></td>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy.startdate}}</a></td>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy.enddate}}</a></td>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy.results.Annualized_return}}</a></td>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy.results.Sharpe_ratio}}</a></td>
+            <td><a href="{% url 'backtest:display' id=strategy.id %}">{{strategy.results.Max_drawdown}}</a></td>
+            {% if user.is_superuser %}
+            <td><a href="{% url 'backtest:delete_strategy' id_strategy=strategy.id %}"><i class="fa fa-trash"
+                        aria-hidden="true"></i> Delete </a></td>
+            <td><a href="{% url 'backtest:move_strategy' id_strategy=strategy.id %}">Change</a></td>
+            <td><a href="{% url 'backtest:export_strategy' id_strategy=strategy.id %}">Export</a></td>
+            {% else %}
+            <td><a href="{% url 'backtest:export_strategy' id_strategy=strategy.id %}">Export</a></td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <td>No Strategy!</td>
+        {% endfor %}
+    </table>
+</div>
+<script>
+    var error_message = "{{error_message|safe}}"
+    $(document).ready(function () {
+        toastr.options = {
+            'closeButton': true,
+            'debug': false,
+            'newestOnTop': false,
+            'progressBar': false,
+            'positionClass': 'toast-top-right',
+            'preventDuplicates': false,
+            'showDuration': '1000',
+            'hideDuration': '1000',
+            'timeOut': '5000',
+            'extendedTimeOut': '1000',
+            'showEasing': 'swing',
+            'hideEasing': 'linear',
+            'showMethod': 'fadeIn',
+            'hideMethod': 'fadeOut',
+        }
+        if (error_message) {
+            toastr.error('Not Empty Folder')
+        }
+
+    })
+</script>
+{% endblock %}

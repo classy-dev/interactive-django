@@ -1,0 +1,97 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<style>
+        #testid+.tag-editor .tag-editor-delete {
+                display: none;
+        }
+</style>
+<div class="table-container">
+        <div class="row">
+                <div class="col-md-6">
+                        <form action="{% url 'tools:liquidity_add_indicator_combination' id_system=id_system %}"
+                                method="POST">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <div class="form-group" style="margin-top: 30px;">
+                                        <input type="submit" value="Add this indicator" class="btn btn-primary" />
+                                        <a class="btn btn-primary"
+                                                href="{% url 'tools:liquidity_manage_liquidity_system' id=id_system %}">Back
+                                                to my
+                                                system</a>
+                                </div>
+                        </form>
+                </div>
+                <div class="col-md-6">
+                        <p>Indicators Available:</p>
+                        <input class="form-control technical" id="testid"></input>
+                </div>
+        </div>
+</div>
+<div id="modal-div"></div>
+{% block jquery %}
+<script>
+        var flag = false;
+        var modalDiv = $("#modal-div");
+        $(document).ready(function () {
+                $.ajax({
+                        method: "GET",
+                        url: '{% url "tools:liquidity_get_indicator" id_system=id_system %}',
+                        dataType: "html",
+                        async: false,
+                        success: function (data) {
+                                var rules = data.split(',');
+                                $('.technical').tagEditor({
+                                        initialTags: rules,
+                                        beforeTagDelete: function (field, editor, tags, val) {
+                                                $.ajax({
+                                                        headers: { "X-CSRFToken": token },
+                                                        method: "GET",
+                                                        url: '{% url "tools:liquidity_get_indicator_form" %}',
+                                                        data: {
+                                                                'techindicator': val,
+                                                                'id_system': id_system,
+                                                                'from': 'add',
+                                                        },
+                                                        success: function (data) {
+                                                                modalDiv.html(data);
+                                                                $("#myEdit").modal('show');
+                                                        }
+                                                })
+                                                return flag;
+                                        },
+                                });
+                                $('#indicator_1').tagEditor({ initialTags: [] });
+                                $('#indicator_2').tagEditor({ initialTags: [] });
+                        }
+                });
+        });
+        var indicator_tree = "{{indicator_tree|safe}}";
+        if (indicator_tree) {
+                indicator_tree = indicator_tree.replace(/'/g, '"');
+                indicator_tree = JSON.parse(indicator_tree)
+                var action_url = "{% url 'tools:liquidity_add_indicator' source='comb' indicator='000000' id_system=id_system %}";
+                $('#jstree-tree')
+                        .on('select_node.jstree', function (e, data) {
+                                var objNode = data.instance.get_node(data.selected)
+                                if (objNode.parent != "#") {
+                                        $.ajax({
+                                                url: action_url.replace('000000', objNode.text),
+                                                success: function (data) {
+                                                        modalDiv.html(data);
+                                                        $("#myEdit").modal('show');
+                                                }
+                                        })
+                                }
+                        })
+                        .jstree({
+                                core: {
+                                        data: indicator_tree
+                                }
+                        });
+        }
+</script>
+{% endblock %}
+{% endblock content %}

@@ -1,0 +1,1000 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if strategy %}
+
+<div class="table-container">
+
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{relative_path}}{{ strategy.name }}</h4>
+        <div class="strategystate"
+            style="margin-top:12px;margin-right:5px; width:15px; height:15px; border-radius: 20px; background-color: {{strategy.state}}">
+        </div>
+    </div>
+    {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+    {% else %}
+    <div class="displayoposite">
+        <div>
+            <a href="{% url 'backtest:modify_generalstrategy' id_strategy=strategy.id %}"
+                class="btn btn-primary margin-right-5"> Modify General </a>
+            <a href="{% url 'backtest:add_indicator_combination' id_strategy=strategy.id  %}"
+                class="btn btn-primary margin-right-5">Add Indicator Combination</a>
+            <a href="{% url 'backtest:add_rule' id_strategy=strategy.id %}" class="btn btn-primary margin-right-5"> Add
+                Rule </a>
+            <a href="{% url 'backtest:add_rulecombination' id_strategy=strategy.id %}"
+                class="btn btn-primary margin-right-5"> Add Rule
+                Combination </a>
+            <a href="{% url 'backtest:add_buyrule'  id_strategy=strategy.id %}" class="btn btn-primary margin-right-5">
+                Add Buy Rule</a>
+            <a href="{% url 'backtest:add_sellrule'  id_strategy=strategy.id %}" class="btn btn-primary margin-right-5">
+                Add Sell Rule </a>
+        </div>
+        <div>
+            <a href="javascript:add_click()" class="btn btn-primary"> Launch Simulation </a>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 10px">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" onclick="openCity(event, 'General')">General</button>
+                <button class="tablinks" style="width: 20%;" onclick="openCity(event, 'Combinations')">Indicator
+                    Combinations</button>
+                <button class="tablinks" onclick="openCity(event, 'Rules')">Rules</button>
+                <button class="tablinks" style="width: 20%;" onclick="openCity(event, 'Rule_Combinations')">Rule
+                    Combinations</button>
+                <button class="tablinks" onclick="openCity(event, 'Buy_Rules')">Buy Rules</button>
+                <button class="tablinks" onclick="openCity(event, 'Sell_Rules')">Sell Rules</button>
+            </div>
+            <div id="General" class="tabcontent active">
+                <table class="table">
+                    <thead>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Starting Capital</td>
+                            <td>{{ strategy.capital }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Max Number of Positions</td>
+                            <td>{{ strategy.positions }}</td>
+                        </tr>
+                        <tr>
+                            <td>Price Commissions</td>
+                            <td>{{ strategy.commissions }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark</td>
+                            {% if strategy.benchmark %}
+                            {% if strategy.benchmark.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_default_universe' id=strategy.benchmark.child_id %}">{{ strategy.benchmark }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_universe' id=strategy.benchmark.child_id %}">{{ strategy.benchmark }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ strategy.benchmark }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Universe</td>
+                            {% if strategy.universe %}
+                            {% if strategy.universe.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:manage_default_universe' id=strategy.universe.child_id %}">{{ strategy.universe }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:manage_universe' id=strategy.universe.child_id %}">{{ strategy.universe }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ strategy.universe }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Liquidity System</td>
+                            {% if strategy.liquidity_system %}
+                            <td><a
+                                    href="{% url 'tools:liquidity_manage_liquidity_system' id=strategy.liquidity_system.id %}">{{ strategy.liquidity_system }}</a>
+                            </td>
+                            {% else %}
+                            <td>{{ strategy.liquidity_system }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Ranking System</td>
+                            {% if strategy.rank_system %}
+                            <td><a
+                                    href="{% url 'tools:rank_manage_ranking_system' id=strategy.rank_system.id %}">{{ strategy.rank_system }}</a>
+                            </td>
+                            {% else %}
+                            <td>{{ strategy.rank_system }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Ranking system rebalance</td>
+                            <td>{{ strategy.rank_rebalance_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>Transaction Type</td>
+                            <td>{{ strategy.transaction_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>Frequency</td>
+                            <td>{{ strategy.frequency }}</td>
+                        </tr>
+                        <tr>
+                            <td>StartDate</td>
+                            <td>{{ strategy.startdate }}</td>
+                        </tr>
+                        <tr>
+                            <td>EndDate</td>
+                            <td>{{ strategy.enddate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Combinations" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Indicator Combinations</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th>Delete</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for combination in indicator_combinations %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td>{{combination}}</td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_combination' id_comb=combination.id id_strategy=strategy.id %}">{{combination}}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="combination" data-id="{{combination.id}}"
+                                    data-strategy="{{strategy.id}}"><i class="fa fa-trash" aria-hidden="true"></i>
+                                    Delete </a></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Indicator Combination</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for rule in strategy.get_rules %}
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        <tr>
+                            <td>{{rule.title}}</td>
+                            <td><a>
+                                    {{rule.technical1}} {{rule.operator}} {{rule.technical2}} </a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td>{{rule.title}}</td>
+                            <td><a href="{% url 'backtest:modify_rule' id_rule=rule.id id_strategy=strategy.id %}">
+                                    {{rule.technical1}} {{rule.operator}} {{rule.technical2}} </a></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rule" data-id="{{rule.rule.id}}" data-strategy="{{strategy.id}}"><i
+                                        class="fa fa-trash" aria-hidden="true"></i> Delete </a></td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Rule</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rule_Combinations" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Rule Combination</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for rulecombination in strategy.get_rule_combinations %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td>{{rulecombination.title}}</td>
+                            <td><a>{{rulecombination}} </a></td>
+                            {% else %}
+                            <td>{{rulecombination.title}}</td>
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=rulecombination.id id_strategy=strategy.id %}">
+                                    {{rulecombination}} </a></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rulecombination" data-id="{{rulecombination.id}}"
+                                    data-strategy="{{strategy.id}}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Rule Combination</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Buy_Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        <th>Active?</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for buyrule in strategy.get_buy_rules %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td>{{buyrule.buyrules.title}}</td>
+                            {% if buyrule.buyrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a>{{buyrule.buyrules}}</a></td>
+                            {% else %}
+                            <td><a>{{buyrule.buyrules}}</a></td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{buyrule.buyrules.title}}" value="{{buyrule.id}}"
+                                    style="margin-left: 15px" {% if buyrule.active %}checked{% endif %} /></td>
+                            {% else %}
+                            <td>{{buyrule.buyrules.title}}</td>
+                            {% if buyrule.buyrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rule' id_rule=buyrule.buyrules.id id_strategy=strategy.id %}">{{buyrule.buyrules}}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=buyrule.buyrules.id id_strategy=strategy.id %}">{{buyrule.buyrules}}</a>
+                            </td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{buyrule.buyrules.title}}" value="{{buyrule.id}}"
+                                    style="margin-left: 15px" {% if buyrule.active %}checked{% endif %} /></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="buyrule" data-id="{{buyrule.id}}" data-strategy="{{strategy.id}}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                            {% endif %}
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Buyrules!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Sell_Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        <th>Active?</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for sellrule in strategy.get_sell_rules %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td>{{sellrule.sellrules.title}}</td>
+                            {% if sellrule.sellrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a>{{sellrule.sellrules}}</a>
+                            </td>
+                            {% else %}
+                            <td><a>{{sellrule.sellrules}}</a>
+                            </td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{sellrule.sellrules.title}}" value="{{sellrule.id}}"
+                                    style="margin-left: 15px" {% if sellrule.active %}checked{% endif %} /></td>
+                            {% else %}
+                            <td>{{sellrule.sellrules.title}}</td>
+                            {% if sellrule.sellrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rule' id_rule=sellrule.sellrules.id id_strategy=strategy.id %}">{{sellrule.sellrules}}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=sellrule.sellrules.id id_strategy=strategy.id %}">{{sellrule.sellrules}}</a>
+                            </td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{sellrule.sellrules.title}}" value="{{sellrule.id}}"
+                                    style="margin-left: 15px" {% if sellrule.active %}checked{% endif %} /></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="sellrule" data-id="{{sellrule.id}}" data-strategy="{{strategy.id}}"><i
+                                        class="fa fa-trash" aria-hidden="true"></i> Delete </a> </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Sell rules!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="status" style="margin-top: 10px;">
+        <div class="progress">
+            <div class="bar progress-bar progress-bar-striped"></div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <form method="post" action="{% url 'backtest:delete' %}">
+            {% csrf_token %}
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <h5 class="modal-title">Are you sure you want to delete?</h5>
+                        <input type="hidden" name="deletetype" id="deletetype" />
+                        <input type="hidden" name="id" id="deleteid" />
+                        <input type="hidden" name="strategyid" id="deletestrategy" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="modal-div">
+    </div>
+
+</div>
+
+<script>
+    var modalDiv = $("#modal-div");
+    $(window).on('load', function () {
+        $('body').addClass('loaded');
+    });
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:strategystate" strategy.id %}',
+            success: function (color) {
+            }
+        });
+        $(document).on("click", ".confirm-delete", function () {
+            $("#deletetype").val($(this).data('type'))
+            $("#deleteid").val($(this).data('id'))
+            $("#deletestrategy").val($(this).data('strategy'))
+        });
+
+        toastr.options = {
+            'closeButton': true,
+            'debug': false,
+            'newestOnTop': false,
+            'progressBar': false,
+            'positionClass': 'toast-top-right',
+            'preventDuplicates': false,
+            'showDuration': '1000',
+            'hideDuration': '1000',
+            'timeOut': '5000',
+            'extendedTimeOut': '1000',
+            'showEasing': 'swing',
+            'hideEasing': 'linear',
+            'showMethod': 'fadeIn',
+            'hideMethod': 'fadeOut',
+        }
+    });
+
+    $(".open-modal").on("click", function () {
+        $.ajax({
+            url: $(this).attr("data-url"),
+            success: function (data) {
+                modalDiv.html(data);
+                $('.customdatepicker').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeYear: true,
+                    changeMonth: true,
+                });
+                $('.customdatepicker').css({
+                    'position': 'relative',
+                    'z-index': '100000'
+                })
+                $("#myEdit").modal('show');
+            }
+        });
+    });
+    document.getElementById('General').style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    var token = '{{csrf_token}}';
+    function add_click() {
+        var sellrule_checked = document.querySelectorAll('#Sell_Rules input[type="checkbox"]:checked');
+        var sellrule_unchecked = document.querySelectorAll('#Sell_Rules input[type="checkbox"]:not(:checked)');
+        var buyrule_checked = document.querySelectorAll('#Buy_Rules input[type="checkbox"]:checked');
+        var buyrule_unchecked = document.querySelectorAll('#Buy_Rules input[type="checkbox"]:not(:checked)');
+        var sellrule_checked_value = [];
+        var sellrule_unchecked_value = [];
+        var buyrule_checked_value = [];
+        var buyrule_unchecked_value = [];
+
+        if (sellrule_checked.length == 0 || buyrule_checked.length == 0) {
+            toastr.error('There should be at least one active buy rule and sell rule')
+        }
+        else {
+            for (var i = 0; i < sellrule_checked.length; i++) {
+                sellrule_checked_value[i] = sellrule_checked[i].value;
+            }
+            for (var i = 0; i < sellrule_unchecked.length; i++) {
+                sellrule_unchecked_value[i] = sellrule_unchecked[i].value;
+            }
+            for (var i = 0; i < buyrule_checked.length; i++) {
+                buyrule_checked_value[i] = buyrule_checked[i].value;
+            }
+            for (var i = 0; i < buyrule_unchecked.length; i++) {
+                buyrule_unchecked_value[i] = buyrule_unchecked[i].value;
+            }
+            var rule_status = {
+                "buyrule_checked": buyrule_checked_value,
+                "buyrule_unchecked": buyrule_unchecked_value,
+                "sellrule_checked": sellrule_checked_value,
+                "sellrule_unchecked": sellrule_unchecked_value,
+            }
+            $.ajax({
+                headers: { "X-CSRFToken": token },
+                type: 'POST',
+                url: '{% url "backtest:rulestatus" strategy.id %}',
+                data: {
+                    "rule_status": JSON.stringify(rule_status)
+                },
+                success: function (data) {
+                }
+            });
+
+            $.ajax({
+                method: "GET",
+                url: '{% url "backtest:launchbacktest" strategy.id %}',
+                dataType: "html",
+                async: false,
+                success: function (task_id) {
+                    var poll_xhr;
+                    var willstop = 0;
+                    (function () {
+                        var poll = function () {
+                            poll_xhr = $.ajax({
+                                url: '{% url "backtest:launch_state" %}',
+                                type: 'POST',
+                                data: {
+                                    task_id: task_id,
+                                    csrfmiddlewaretoken: "{{csrf_token}}",
+                                },
+                                success: function (result) {
+                                    if (result.process_percent == null || result.process_percent == undefined) {
+                                        willstop = 1;
+                                        jQuery('.bar').css({ 'width': 100 + '%' });
+                                        jQuery('.bar').html(100 + '%');
+                                        location.href = "{% url 'backtest:launch_result' strategy.id %}"
+                                    } else {
+                                        jQuery('.bar').css({ 'width': result.process_percent + '%' });
+                                        jQuery('.bar').html(result.process_percent + '%');
+                                    };
+                                }
+                            });
+                        };
+
+                        var refreshIntervalId = setInterval(function () {
+                            poll();
+                            if (willstop == 1) {
+                                clearInterval(refreshIntervalId);
+                            }
+                        }, 500);
+                    })();
+                }
+            });
+        }
+    }
+</script>
+{% elif selectstrategy %}
+<div class="table-container">
+
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{relative_path}}{{ selectstrategy.name }}</h4>
+        <div class="strategystate"
+            style="margin-top:12px;margin-right:5px; width:15px; height:15px; border-radius: 20px; background-color: {{selectstrategy.state}}">
+        </div>
+    </div>
+
+    <div class="displayoposite">
+        <div>
+            <a href="{% url 'backtest:modify_generalstrategy' id_strategy=selectstrategy.id %}"
+                class="btn btn-primary margin-right-5" href="#"> Modify General </a>
+            <a href="#" class="btn btn-primary margin-right-5">Add Indicator Combination</a>
+            <a href="{% url 'backtest:add_rule' id_strategy=selectstrategy.id %}"
+                class="btn btn-primary margin-right-5"> Add
+                Rule </a>
+            <a href="{% url 'backtest:add_rulecombination' id_strategy=selectstrategy.id %}"
+                class="btn btn-primary margin-right-5"> Add Rule
+                Combination </a>
+            <a href="{% url 'backtest:add_buyrule'  id_strategy=selectstrategy.id %}"
+                class="btn btn-primary margin-right-5">
+                Add Buy Rule</a>
+            <a href="{% url 'backtest:add_sellrule'  id_strategy=selectstrategy.id %}"
+                class="btn btn-primary margin-right-5">
+                Add Sell Rule </a>
+        </div>
+        <div>
+            <a href="javascript:add_click()" class="btn btn-primary"> Launch Simulation </a>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 10px">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" onclick="openCity(event, 'General')">General</button>
+                <button class="tablinks" style="width: 20%;" onclick="openCity(event, 'Combinations')">Indicator
+                    Combinations</button>
+                <button class="tablinks" onclick="openCity(event, 'Rules')">Rules</button>
+                <button class="tablinks" style="width: 20%;" onclick="openCity(event, 'Rule_Combinations')">Rule
+                    Combinations</button>
+                <button class="tablinks" onclick="openCity(event, 'Buy_Rules')">Buy Rules</button>
+                <button class="tablinks" onclick="openCity(event, 'Sell_Rules')">Sell Rules</button>
+            </div>
+            <div id="General" class="tabcontent active">
+                <table class="table">
+                    <thead>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Starting Capital</td>
+                            <td>{{ selectstrategy.capital }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Max Number of Positions</td>
+                            <td>{{ selectstrategy.positions }}</td>
+                        </tr>
+                        <tr>
+                            <td>Price Commissions</td>
+                            <td>{{ selectstrategy.commissions }}$</td>
+                        </tr>
+                        <tr>
+                            <td>Benchmark</td>
+                            {% if selectstrategy.benchmark %}
+                            {% if selectstrategy.benchmark.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_default_universe' id=selectstrategy.benchmark.child_id %}">{{ selectstrategy.benchmark }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:benchmarks_manage_universe' id=selectstrategy.benchmark.child_id %}">{{ selectstrategy.benchmark }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ selectstrategy.benchmark }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Universe</td>
+                            {% if selectstrategy.universe %}
+                            {% if selectstrategy.universe.permission == 1 %}
+                            <td><a
+                                    href="{% url 'tools:manage_default_universe' id=selectstrategy.universe.child_id %}">{{ selectstrategy.universe }}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:manage_universe' id=selectstrategy.universe.child_id %}">{{ selectstrategy.universe }}</a>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{ selectstrategy.universe }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Liquidity System</td>
+                            {% if selectstrategy.liquidity_system %}
+                            <td><a
+                                    href="{% url 'tools:liquidity_manage_liquidity_system' id=selectstrategy.liquidity_system.id %}">{{ selectstrategy.liquidity_system }}</a>
+                            </td>
+                            {% else %}
+                            <td>{{ selectstrategy.liquidity_system }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Ranking System</td>
+                            {% if selectstrategy.rank_system %}
+                            <td><a
+                                    href="{% url 'tools:rank_manage_ranking_system' id=selectstrategy.rank_system.id %}">{{ selectstrategy.rank_system }}</a>
+                            </td>
+                            {% else %}
+                            <td>{{ selectstrategy.rank_system }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Ranking system rebalance</td>
+                            <td>{{ selectstrategy.rank_rebalance_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>Transaction Type</td>
+                            <td>{{ selectstrategy.transaction_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>Frequency</td>
+                            <td>{{ selectstrategy.frequency }}</td>
+                        </tr>
+                        <tr>
+                            <td>StartDate</td>
+                            <td>{{ selectstrategy.startdate }}</td>
+                        </tr>
+                        <tr>
+                            <td>EndDate</td>
+                            <td>{{ selectstrategy.enddate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Combinations" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Indicator Combinations</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th>Delete</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for combination in indicator_combinations %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td><a href="#">{{combination}}</a></td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_combination' id_comb=combination.id id_strategy=selectstrategy.id %}">{{combination}}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="combination" data-id="{{combination.id}}"
+                                    data-strategy="{{selectstrategy.id}}"><i class="fa fa-trash" aria-hidden="true"></i>
+                                    Delete </a></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Indicator Combination</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        {% for rule in selectstrategy.get_rules %}
+                        <tr>
+                            <td>{{rule.title}}</td>
+                            <td><a
+                                    href="{% url 'backtest:modify_rule' id_rule=rule.id id_strategy=selectstrategy.id %}">
+                                    {{rule.technical1}} {{rule.operator}} {{rule.technical2}} </a></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rule" data-id="{{rule.rule.id}}" data-strategy="{{selectstrategy.id}}"><i
+                                        class="fa fa-trash" aria-hidden="true"></i> Delete </a></td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Rule</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rule_Combinations" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Rule Combination</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        {% for rulecombination in selectstrategy.get_rule_combinations %}
+                        <tr>
+                            <td>{{rulecombination.title}}</td>
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=rulecombination.id id_strategy=selectstrategy.id %}">
+                                    {{rulecombination}} </a></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rulecombination" data-id="{{rulecombination.id}}"
+                                    data-strategy="{{selectstrategy.id}}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Rule Combination</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Buy_Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        <th>Active?</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        {% for buyrule in selectstrategy.get_buy_rules %}
+                        <tr>
+                            <td>{{buyrule.buyrules.title}}</td>
+                            {% if buyrule.buyrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rule' id_rule=buyrule.buyrules.id id_strategy=selectstrategy.id %}">{{buyrule.buyrules}}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=buyrule.buyrules.id id_strategy=selectstrategy.id %}">{{buyrule.buyrules}}</a>
+                            </td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{buyrule.buyrules.title}}" value="{{buyrule.id}}"
+                                    style="margin-left: 15px" {% if buyrule.active %}checked{% endif %} /></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="buyrule" data-id="{{buyrule.id}}" data-strategy="{{selectstrategy.id}}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Buy Rule</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="Sell_Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        <th>Active?</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        {% for sellrule in selectstrategy.get_sell_rules %}
+                        <tr>
+                            <td>{{sellrule.sellrules.title}}</td>
+                            {% if sellrule.sellrules.polymorphic_ctype|stringformat:"s" == "rule" %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rule' id_rule=sellrule.sellrules.id id_strategy=selectstrategy.id %}">{{sellrule.sellrules}}</a>
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'backtest:modify_rulecombination' id_rulecombination=sellrule.sellrules.id id_strategy=selectstrategy.id %}">{{sellrule.sellrules}}</a>
+                            </td>
+                            {% endif %}
+                            <td><input type="checkbox" name="{{sellrule.sellrules.title}}" value="{{sellrule.id}}"
+                                    style="margin-left: 15px" {% if sellrule.active %}checked{% endif %} /></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="sellrule" data-id="{{sellrule.id}}"
+                                    data-strategy="{{selectstrategy.id}}"><i class="fa fa-trash" aria-hidden="true"></i>
+                                    Delete </a> </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Sell Rule!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="status" style="margin-top: 10px;">
+        <div class="progress">
+            <div class="bar progress-bar progress-bar-striped"></div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <form method="post" action="{% url 'backtest:delete' %}">
+            {% csrf_token %}
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <h5 class="modal-title">Are you sure you want to delete?</h5>
+                        <input type="hidden" name="deletetype" id="deletetype" />
+                        <input type="hidden" name="id" id="deleteid" />
+                        <input type="hidden" name="strategyid" id="deletestrategy" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="modal-div">
+    </div>
+
+</div>
+<input type="hidden" id="child_id">
+<script>
+    var modalDiv = $("#modal-div");
+    $(window).on('load', function () {
+        $('body').addClass('loaded');
+    });
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:strategystate" selectstrategy.id %}',
+            success: function (color) {
+            }
+        });
+        $(document).on("click", ".confirm-delete", function () {
+            $("#deletetype").val($(this).data('type'))
+            $("#deleteid").val($(this).data('id'))
+            $("#deletestrategy").val($(this).data('strategy'))
+        });
+    });
+
+    document.getElementById('General').style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    var token = '{{csrf_token}}';
+    function add_click() {
+        var sellrule_checked = document.querySelectorAll('#Sell_Rules input[type="checkbox"]:checked');
+        var sellrule_unchecked = document.querySelectorAll('#Sell_Rules input[type="checkbox"]:not(:checked)');
+        var buyrule_checked = document.querySelectorAll('#Buy_Rules input[type="checkbox"]:checked');
+        var buyrule_unchecked = document.querySelectorAll('#Buy_Rules input[type="checkbox"]:not(:checked)');
+        var sellrule_checked_value = [];
+        var sellrule_unchecked_value = [];
+        var buyrule_checked_value = [];
+        var buyrule_unchecked_value = [];
+
+        if (sellrule_checked.length == 0 || buyrule_checked.length == 0) {
+            toastr.error('There should be at least one active buy rule and sell rule')
+        }
+        else {
+            for (var i = 0; i < sellrule_checked.length; i++) {
+                sellrule_checked_value[i] = sellrule_checked[i].value;
+            }
+            for (var i = 0; i < sellrule_unchecked.length; i++) {
+                sellrule_unchecked_value[i] = sellrule_unchecked[i].value;
+            }
+            for (var i = 0; i < buyrule_checked.length; i++) {
+                buyrule_checked_value[i] = buyrule_checked[i].value;
+            }
+            for (var i = 0; i < buyrule_unchecked.length; i++) {
+                buyrule_unchecked_value[i] = buyrule_unchecked[i].value;
+            }
+            var rule_status = {
+                "buyrule_checked": buyrule_checked_value,
+                "buyrule_unchecked": buyrule_unchecked_value,
+                "sellrule_checked": sellrule_checked_value,
+                "sellrule_unchecked": sellrule_unchecked_value,
+            }
+            $.ajax({
+                headers: { "X-CSRFToken": token },
+                type: 'POST',
+                url: '{% url "backtest:rulestatus" selectstrategy.id %}',
+                data: {
+                    "rule_status": JSON.stringify(rule_status)
+                },
+                success: function (data) {
+                }
+            });
+
+            $.ajax({
+                method: "GET",
+                url: '{% url "backtest:launchbacktest" selectstrategy.id %}',
+                dataType: "html",
+                async: false,
+                success: function (task_id) {
+                    var poll_xhr;
+                    var willstop = 0;
+                    (function () {
+                        var poll = function () {
+                            poll_xhr = $.ajax({
+                                url: '{% url "backtest:launch_state" %}',
+                                type: 'POST',
+                                data: {
+                                    task_id: task_id,
+                                    csrfmiddlewaretoken: "{{csrf_token}}",
+                                },
+                                success: function (result) {
+                                    if (result.process_percent == null || result.process_percent == undefined) {
+                                        willstop = 1;
+                                        jQuery('.bar').css({ 'width': 100 + '%' });
+                                        jQuery('.bar').html(100 + '%');
+                                        location.href = "{% url 'backtest:launch_result' selectstrategy.id %}"
+                                    } else {
+                                        jQuery('.bar').css({ 'width': result.process_percent + '%' });
+                                        jQuery('.bar').html(result.process_percent + '%');
+                                    };
+                                }
+                            });
+                        };
+
+                        var refreshIntervalId = setInterval(function () {
+                            poll();
+                            if (willstop == 1) {
+                                clearInterval(refreshIntervalId);
+                            }
+                        }, 500);
+                    })();
+                }
+            });
+        }
+    }
+</script>
+{% else %}
+<script>
+</script>
+{% endif %}
+{% endblock %}

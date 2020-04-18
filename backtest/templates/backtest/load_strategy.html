@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{% url "backtest:load_strategy" %}" method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to load this strategy "{{  }}"?</p>
+    {{ form.as_p }}
+    <input type="submit" value="Confirm" />
+</form>
+{% endblock content %}

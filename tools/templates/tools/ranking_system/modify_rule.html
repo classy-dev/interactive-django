@@ -1,0 +1,84 @@
+{% extends "tools/ranking_system/base_ranking_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="{% url 'tools:rank_modify_rule' id_rank=rank_system_id id_rule=id_rule %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" value="Modify this rule" class="btn btn-primary" />
+                    <a class="btn btn-primary"
+                        href="{% url 'tools:rank_manage_ranking_system' id=rank_system_id %}">Back to my
+                        ranking system</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <p>Indicators Available:</p>
+            <input class="form-control technical"></input>
+        </div>
+    </div>
+</div>
+<div id="modal-div"></div>
+<script>
+    var token = '{{csrf_token}}';
+    var rank_id = "{{rank_system_id}}";
+    var modalDiv = $("#modal-div");
+    var flag = false;
+    var rule_id = "{{id_rule}}"
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:rank_get_indicator" id_rank=rank_system_id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('.technical').tagEditor({
+                    initialTags: rules,
+                    beforeTagDelete: function (field, editor, tags, val) {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            method: "GET",
+                            url: '{% url "tools:rank_get_indicator_add" %}',
+                            data: {
+                                'techindicator': val,
+                                'id_rank': rank_id,
+                                'from': 'modify',
+                                'ruleid': rule_id
+                            },
+                            success: function (data) {
+                                modalDiv.html(data);
+                                $("#myEdit").modal('show');
+                            }
+                        })
+                        return flag;
+                    },
+                });
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:rank_get_tech" id_rule=id_rule id_rank=rank_system_id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                $('#indicator').tagEditor({ initialTags: [data] });
+            }
+        });
+    });
+    $(".open-modal").on("click", function () {
+        $.ajax({
+            url: $(this).attr("data-url"),
+            success: function (data) {
+                modalDiv.html(data);
+                $("#myEdit").modal('show');
+            }
+        });
+    });
+</script>
+{% endblock content %}

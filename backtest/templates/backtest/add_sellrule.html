@@ -1,0 +1,45 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% block content %}
+<style>
+    #testid+.tag-editor .tag-editor-delete {
+        display: none;
+    }
+</style>
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <p>Add rule: </p>
+            <form action="{% url "backtest:add_sellrule" id_strategy=strategy.id %}" method="post">
+                {% csrf_token %}
+                <input type="text" name="sell_rule" id="sell_rule" class="form-control" required>
+                <input type="submit" class="btn btn-primary" value="Add this rule" style="margin-top: 10px"/>
+                <a class="btn btn-primary" href="{% url 'backtest:display' id=strategy.id %}" style="margin-top: 10px">back to my strategy</a>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <p>Rules Available:</p>
+            <inptu id="testid" class="form-control sell_rule" disabled="disabled"></inptu>
+        </div>
+    </div>
+</div>
+
+{% block jquery %}
+<script>
+
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_rule_combination_add" strategy.id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split('#');
+                $('.sell_rule').tagEditor({ initialTags: rules });
+                $('#sell_rule').tagEditor({ initialTags: [] });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock content %}

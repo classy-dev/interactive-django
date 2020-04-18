@@ -1,0 +1,86 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="{% url "backtest:modify_rule" id_rule=rule.id id_strategy=strategy.id %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" class="btn btn-primary" value="Add this rule" />
+                    <a class="btn btn-primary" href="{% url 'backtest:display' id=strategy.id %}">back to my
+                        strategy</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <label>Technical Indicators Available:</label>
+            <input class="form-control technical"></input>
+        </div>
+    </div>
+</div>
+<div id="modal-div"></div>
+
+{% block jquery %}
+<script>
+    var token = '{{csrf_token}}';
+    var strategyid = "{{strategy.id}}";
+    var modalDiv = $("#modal-div");
+    var ruleid = '{{rule.id}}'
+    var flag = false;
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_rules" strategy.id %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split('#');
+                $('.technical').tagEditor({
+                    initialTags: rules,
+                    beforeTagDelete: function (field, editor, tags, val) {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            method: "GET",
+                            url: '{% url "backtest:gettechnical" %}',
+                            data: {
+                                'techindicator': val,
+                                'id_strategy': strategyid,
+                                'from': 'modify',
+                                'ruleid': ruleid
+                            },
+                            success: function (data) {
+                                modalDiv.html(data);
+                                $("#myEdit").modal('show');
+                            }
+                        })
+                        return flag;
+                    }
+                });
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_techs" id_rule=id_rule id_strategy=id_strategy %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var techs = data.split(',');
+                $('#technical_1').tagEditor({ initialTags: [techs[0]] });
+                $('#technical_2').tagEditor({ initialTags: [techs[1]] });
+            }
+        });
+    });
+    $(".open-modal").on("click", function () {
+        $.ajax({
+            url: $(this).attr("data-url"),
+            success: function (data) {
+                modalDiv.html(data);
+                $("#myEdit").modal('show');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock content %}

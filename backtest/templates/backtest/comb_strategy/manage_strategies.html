@@ -1,0 +1,36 @@
+{% extends 'backtest/comb_strategy/comb_strategy_base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{title}}</h4>
+    </div>
+    <div class="flex-wrap">
+        <a href="{% url 'backtest:comb_create_comb_strategy' %}" class="btn btn-primary">Create Combination Strategy</a>
+        <a href="{% url 'backtest:comb_load_strategy' %}" class="btn btn-primary">Load Combination Strategy</a>
+    </div>
+    <table class="table sortable" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Combination Strategies</th>
+                <th>Export</th>
+                <th>Delete</th>
+            </tr>            
+        </thead>
+        <tbody>
+            {% for comb_strategy in comb_strategies %}
+                <tr>
+                    <td><a href="{% url 'backtest:comb_manage_strategy' id_strategy=comb_strategy.id %}">{{comb_strategy}}</a></td>
+                    <td><a href="{% url 'backtest:comb_export_strategy' id_folder=id_folder id_strategy=comb_strategy.id %}">Export</a></td>
+                    <td><a href="{% url 'backtest:comb_delete_strategy' id_strategy=comb_strategy.id %}"><i class="fa fa-trash"
+                        aria-hidden="true"></i>Delete</a></td>
+                </tr>
+            {% empty %}
+                <tr><td>No Combination Strategies</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

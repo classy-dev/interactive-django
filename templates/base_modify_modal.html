@@ -1,0 +1,28 @@
+<div class="modal fade" id="myEdit" role="dialog">
+  <div class="modal-dialog">
+    <form method="post" action="{% block actionURL %}{% endblock %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header" style="padding-bottom: 0px;border:none">
+          <h2 class="modal-title">{% block title %}{% endblock %}</h2>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-header" style="padding-top:0px; padding-bottom: 0px;">
+          <label style="margin-top:0px !important;">{% block description %}{% endblock %}</label>
+        </div>
+        <div class="modal-body">
+          {% block content %}
+          {% endblock %}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Modify</button>
+          {% if error %}
+          {% else %}
+          <a class="btn btn-primary" href="{% block deleteURL %}{% endblock %}"> Delete</a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script>

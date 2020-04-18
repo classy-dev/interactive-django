@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{% url "backtest:export_strategy" id_strategy=strategy.id %}" method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to export this strategy "{{ strategy.name }}"?</p>
+    {{ form.as_p }}
+    <input type="submit" value="Confirm" />
+</form>
+{% endblock content %}

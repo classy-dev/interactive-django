@@ -1,0 +1,245 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="displayoposite">
+        <h4 class="strategy_title">{{relative_path}}{{liquidity_system}}</h4>
+    </div>
+    {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+    {% else %}
+    <div class="flex-wrap">
+        <a href="{% url 'tools:liquidity_add_indicator_combination' id_system=liquidity_system.id %}"
+            class="btn btn-primary">Add
+            Indicator Combination
+        </a>
+        <a href="{% url 'tools:liquidity_add_rule' id_system=liquidity_system.id %}" class="btn btn-primary">Add Rule
+        </a>
+        <a href="{% url 'tools:liquidity_add_rule_combination' id_system=liquidity_system.id %}"
+            class="btn btn-primary">Add Rule Combination
+        </a>
+        <a href="{% url 'tools:liquidity_add_liquidity_rule' id_system=liquidity_system.id %}"
+            class="btn btn-primary">Add Liquidity Rule
+        </a>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 10px">
+        <div class="col-md-12">
+            <div class="tab">
+                <button class="tablinks active" style="width: 25%;" onclick="openCity(event, 'Combinations')">Indicator
+                    Combinations</button>
+                <button class="tablinks" style="width: 25%;" onclick="openCity(event, 'Rules')">Rules</button>
+                <button class="tablinks" style="width: 25%;" onclick="openCity(event, 'Rule_Combinations')">Rule
+                    Combinations</button>
+                <button class="tablinks" style="width: 25%;" onclick="openCity(event, 'Liquidity_Rules')">Liquidity
+                    Rules</button>
+            </div>
+            <div id="Combinations" class="tabcontent active">
+                <table class="table">
+                    <thead>
+                        <th>Indicator Combinations:</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th>Delete:</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for combination in indicator_combinations %}
+                        <tr>
+                            {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                            <td>{{combination}}
+                            </td>
+                            {% else %}
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_combination' id_comb=combination.id id_system=liquidity_system.id %}">{{combination}}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="combination" data-id="{{combination.id}}"
+                                    data-system="{{liquidity_system.id}}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>Delete </a> </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No Indicator Combination</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Test Rule</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for rule in liquidity_system.get_rules %}
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        <tr>
+                            <td><a>{{rule.title}}</a></td>
+                            <td><a>{{rule.technical1}}{{rule.operator}} {{rule.technical2}}</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_rule' id_rule=rule.id id_system=liquidity_system.id %}">{{rule.title}}</a>
+                            </td>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_rule' id_rule=rule.id id_system=liquidity_system.id %}">{{rule.technical1}}
+                                    {{rule.operator}} {{rule.technical2}}</a></td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rule" data-id="{{rule.id}}" data-system="{{liquidity_system.id}}"><i
+                                        class="fa fa-trash" aria-hidden="true"></i> Delete </a></td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td>No Rules!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Rule_Combinations" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Title</th>
+                        <th>Rule Combination</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for rulecombination in liquidity_system.get_rule_combinations %}
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        <tr>
+                            <td><a>{{rulecombination.title}}</a></td>
+                            <td><a>{{rulecombination}}</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_rulecombination' id_rule=rulecombination.id id_system=liquidity_system.id %}">{{rulecombination.title}}</a>
+                            </td>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_rulecombination' id_rule=rulecombination.id id_system=liquidity_system.id %}">{{rulecombination}}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="rulecombination" data-id="{{rulecombination.id}}"
+                                    data-system="{{liquidity_system.id}}"><i class="fa fa-trash" aria-hidden="true"></i>
+                                    Delete </a></td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td>No Rule Combinations!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="Liquidity_Rules" class="tabcontent">
+                <table class="table">
+                    <thead>
+                        <th>Min amount</th>
+                        <th>Max amount</th>
+                        <th>Test Rules</th>
+                        <th>Name</th>
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        {% else %}
+                        <th></th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for liquidity_rule in liquidity_system.get_liquidity_rules %}
+                        {% if not user.is_superuser and relative_path == 'Default Folder/' %}
+                        <tr>
+                            <td><a>{{liquidity_rule.min_amount}}</a></td>
+                            <td><a>{{liquidity_rule.max_amount}}</a></td>
+                            <td><a>{{liquidity_rule.rule}}</a></td>
+                            <td><a>{{liquidity_rule.name}}</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_liquidity_rule' id_rule=liquidity_rule.id id_system=liquidity_system.id %}">{{liquidity_rule.min_amount}}</a>
+                            </td>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_liquidity_rule' id_rule=liquidity_rule.id id_system=liquidity_system.id %}">{{liquidity_rule.max_amount}}</a>
+                            </td>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_liquidity_rule' id_rule=liquidity_rule.id id_system=liquidity_system.id %}">{{liquidity_rule.rule}}</a>
+                            </td>
+                            <td><a
+                                    href="{% url 'tools:liquidity_modify_liquidity_rule' id_rule=liquidity_rule.id id_system=liquidity_system.id %}">{{liquidity_rule.name}}</a>
+                            </td>
+                            <td><a href="#" class="confirm-delete" data-toggle="modal" data-target="#myModal"
+                                    data-type="liquidityrule" data-id="{{liquidity_rule.id}}"
+                                    data-system="{{liquidity_system.id}}"><i class="fa fa-trash" aria-hidden="true"></i>
+                                    Delete </a></td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td>No Liquidity Rules!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <form method="post" action="{% url 'tools:liquidity_delete' %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title">Are you sure you want to delete?</h5>
+                    <input type="hidden" name="id_system" id="id_system" />
+                    <input type="hidden" name="id_element" id="id_element" />
+                    <input type="hidden" name="type" id="type" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $(document).on("click", ".confirm-delete", function () {
+            $("#id_system").val($(this).data('system'));
+            $("#id_element").val($(this).data('id'));
+            $("#type").val($(this).data('type'));
+        });
+    })
+    document.getElementById('Combinations').style.display = "block";
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }    
+</script>
+{% endblock %}

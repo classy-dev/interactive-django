@@ -1,0 +1,64 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% load static %}
+
+{% block content %}
+<style>
+    #testid+.tag-editor .tag-editor-delete {
+        display: none;
+    }
+</style>
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="#" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" value="Modify" class="btn btn-primary" />
+                    <a class="btn btn-primary"
+                        href="{% url 'tools:liquidity_manage_liquidity_system' id=id_system %}">Back
+                        to my
+                        system</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <p>Indicators Available:</p>
+            <input class="form-control technical" id="testid"></input>
+        </div>
+    </div>
+</div>
+<script>
+    var id_system = "{{id_system}}";
+    var modalDiv = $("#modal-div");
+    var token = '{{csrf_token}}';
+    var flag = false;
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: "{% url 'tools:liquidity_get_techs_comb' id_comb=id_comb %}",
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var techs = data.split(',');
+                $("#indicator_1").tagEditor({ initialTags: [techs[0]] });
+                $("#indicator_2").tagEditor({ initialTags: [techs[1]] });
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:liquidity_get_indicators_basic" id_system %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('.technical').tagEditor({
+                    initialTags: rules,
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock content %}

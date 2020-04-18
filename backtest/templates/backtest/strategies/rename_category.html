@@ -1,0 +1,29 @@
+{% extends "backtest/strategies/strategy_base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'backtest:rename_category' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Rename Folder</h2>
+                <label>Select folder you are going to rename :</label>
+                <select class="form-control" name="id" required>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{category.path}}</option>
+                    {% endfor %}
+                </select>
+                <label>Name:</label>
+                <input type="text" name="category_name" class="form-control" required>
+                <input type="submit" value="Rename" class="btn btn-primary pull-right" style="margin-top: 30px" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<script>
+</script>
+{% endblock content %}

@@ -1,0 +1,86 @@
+{% extends "tools/liquidity_system/base_liquidity_system.html" %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="{% url 'tools:liquidity_modify_rule' id_rule=id_rule id_system=id_system %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group" style="margin-top: 30px;">
+                    <input type="submit" class="btn btn-primary" value="Modify this rule" />
+                    <a class="btn btn-primary"
+                        href="{% url 'tools:liquidity_manage_liquidity_system' id=id_system%}">Back to my
+                        system</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <p>Technical Indicators Available:</p>
+            <input class="form-control technical"></input>
+        </div>
+    </div>
+</div>
+<div id="modal-div"></div>
+{% block jquery %}
+<script>
+    var id_system = "{{id_system}}";
+    var token = '{{csrf_token}}';
+    var flag = false;
+    var modalDiv = $("#modal-div");
+    var id_rule = "{{id_rule}}"
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: '{% url "backtest:get_techs" id_rule=id_rule id_strategy=0 %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var techs = data.split(',');
+                $('#technical_1').tagEditor({ initialTags: [techs[0]] });
+                $('#technical_2').tagEditor({ initialTags: [techs[1]] });
+            }
+        });
+        $.ajax({
+            method: "GET",
+            url: '{% url "tools:liquidity_get_indicator" id_system=id_system %}',
+            dataType: "html",
+            async: false,
+            success: function (data) {
+                var rules = data.split(',');
+                $('.technical').tagEditor({
+                    initialTags: rules,
+                    beforeTagDelete: function (field, editor, tags, val) {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            method: "GET",
+                            url: '{% url "tools:liquidity_get_indicator_form" %}',
+                            data: {
+                                'techindicator': val,
+                                'id_system': id_system,
+                                'from': 'modify',
+                                'ruleid': id_rule,
+                            },
+                            success: function (data) {
+                                modalDiv.html(data);
+                                $("#myEdit").modal('show');
+                            }
+                        })
+                        return flag;
+                    },
+                });
+            }
+        });
+    });
+    $(".open-modal").on("click", function () {
+        $.ajax({
+            url: $(this).attr("data-url"),
+            success: function (data) {
+                modalDiv.html(data);
+                $("#myEdit").modal('show');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock content %}

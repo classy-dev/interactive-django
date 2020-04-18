@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Interactive Alpha{% endblock %}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel='stylesheet' type='text/css' href="{% static "css/ionicons.min.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/owl.carousel.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/magnific-popup.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/style.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/strategy_tabs.css" %}" >
+        <link rel='stylesheet' type='text/css' href="{% static "css/strategy_btns.css" %}" >
+        <link href="{% static 'bootstrap_tags/css/drag_drop.css' %}" rel="stylesheet">
+        <link href="{% static 'chart/css/tab_style.css' %}" rel="stylesheet">
+        <link href="{% static 'chart/css/chart_style.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'chart/css/normalize.min.css' %}"/>
+        <link rel="stylesheet" href="{% static 'chart/css/bootstrap-select.min.css' %}">
+        <link rel="stylesheet" href="{% static 'chart/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'chart/css/bootstrap-colorpicker.css' %}"/>
+        <link rel="stylesheet" href="{% static 'chart/css/anychart-ui.min.css' %}"/>
+        <link rel="stylesheet" href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css">
+        <link rel="stylesheet" href="{% static 'chart/css/style.css' %}">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css">
+        <script src="{% static 'chart/js/jquery.min.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js"></script>
+    </head>
+    <body>
+        <a href='#' class="menu-btn" >
+            <span class='lines' >
+                <span class='l1' ></span>
+                <span class='l2' ></span>
+                <span class='l3' ></span>
+            </span>
+        </a>
+        <nav class='menu' >
+            <ul>
+                <li>
+                    <a href={% url 'backtest:strategies_list' %}>
+                        Backtest
+                    </a>
+                </li>
+                <li>
+                    <a href={% url 'chart:view_chart' %}>
+                        Chart
+                    </a>
+                </li>
+                <li>
+                    <a href={% url 'account:login' %}>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href={% url 'account:logout' %}>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div id='preloader' >
+            <div class="loader">
+                <div class="loader-inner box1"></div>
+                <div class="loader-inner box2"></div>
+                <div class="loader-inner box3"></div>
+            </div>
+        </div>
+        <div id='main-wrapper' >
+                <section id='features' class='section features-section'>
+                    <div class='container-fluid' style="max-width: 1800px;">
+                        {% block content %}{% endblock %}
+                    </div>
+                </section>
+                <footer class="backtest-footer">
+                    <div class='container text-center' >
+                        <p>&copy; Interactive Alpha</p>
+                    </div>
+                </footer>
+            </div>
+    </body>
+    <script>
+        $(window).on('load', function(){
+            $('body').addClass('loaded');
+
+        });
+    </script>
+    
+    <script src="https://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
+    <script src="{% static 'chart/js/bootstrap.min.js' %}"></script>
+    <script src='{% static "js/script.js" %}' ></script>
+    <script src="{% static 'chart/js/bootstrap-colorpicker.min.js' %}"></script>
+    <script src="{% static 'chart/js/base.min.js' %}"></script>
+    <script src="{% static 'chart/js/stock.min.js' %}"></script>
+    <script src="{% static 'chart/js/annotations.min.js' %}"></script>
+    <script src="{% static 'chart/js/exports.min.js' %}"></script>
+    <script src="{% static 'chart/js/vml.min.js' %}"></script>
+    <script src="{% static 'chart/js/ui.min.js' %}"></script>
+    <script src="{% static 'chart/js/bootstrap-select.min.js' %}"></script>
+    <script src="{% static 'chart/js/common.js' %}"></script>
+    <script src="{% static 'chart/js/chart_custom_func.js' %}"></script>
+    <script>
+        function sendAnnotationsToServer(data, file_name) {
+              window.CSRF_TOKEN = "{{ csrf_token }}";
+              /* here a variable for saving annotations is used,
+              but you can save them to a database, local storage, or server*/
+              $.ajax({
+                  url: '{% url 'chart:write_json' %}',
+                  type: 'POST',
+                  data: {csrfmiddlewaretoken: window.CSRF_TOKEN, json_data: data, f_name: file_name},
+                  dataType: 'json',
+                  success: function(msg){
+                      if (msg === "success") {
+                          location.reload(true);
+                      }
+                  }
+              });
+        }
+    </script>
+
+    <!-- This library enables the automatic resizing of the height and width of
+    both same and cross domain iFrames to fit their contained content.   -->
+    <script src="{% static 'chart/js/iframeResizer.contentWindow.min.js' %}"></script>
+</html>

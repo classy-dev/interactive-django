@@ -1,0 +1,31 @@
+{% extends "tools/lists/base_universes.html" %}
+
+{% block content %}
+<div class="table-container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-4">
+            <form action="{% url 'tools:lists_delete_folder' %}" method="post">
+                {% csrf_token %}
+                <h2 class="strategy_title text-left">Delete Folder</h2>
+                <label>Select folder you are going to delete :</label>
+                <select class="form-control" name="folder_id" required>
+                    {% for folder in folders %}
+                    <option value="{{folder.id}}">{{folder.path}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Delete" class="btn btn-primary pull-right" style="margin-top: 30px" />
+            </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<script>
+    var error_message = "{{error_message|safe}}"
+    $(document).ready(function () {
+        if (error_message) {
+            toastr.error('Not Empty Folder')
+        }
+    })
+</script>
+{% endblock content %}
